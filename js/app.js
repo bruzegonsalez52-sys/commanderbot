@@ -1074,8 +1074,13 @@ await interaction.showModal(modal);`;
       email: sbUser.email,
       username: meta.username || sbUser.email?.split('@')[0] || 'Usuario',
       plan: meta.plan || 'free',
+      admin: meta.admin === true,
       createdAt: sbUser.created_at
     };
+  }
+
+  isAdmin() {
+    return this.currentUser && this.currentUser.admin === true;
   }
 
   loadSession() {
@@ -1138,6 +1143,12 @@ await interaction.showModal(modal);`;
       this.dom.settingsPlan.textContent = planDesc;
       this.dom.settingsBadge.textContent = planLabels[plan] || t('free');
       this.dom.settingsBadge.className = 'settings-badge ' + plan;
+      if (this.isAdmin()) {
+        this.dom.settingsBadge.textContent = '👑 Admin';
+        this.dom.settingsBadge.className = 'settings-badge premium';
+        this.dom.userPlan.textContent = 'Admin';
+        this.dom.userPlan.className = 'user-plan premium';
+      }
       this.dom.settingsLoginBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> ' + t('settings.logout');
     } else {
       this.dom.sidebarUser.style.display = 'none';
