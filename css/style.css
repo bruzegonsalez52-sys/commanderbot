@@ -1447,3 +1447,62 @@ html, body {
   padding: 4px 0;
   cursor: pointer;
 }
+
+/* ─── Admin Edit Modal ─── */
+#adminEditModal .modal {
+  max-width: 420px;
+}
+#adminEditModal .form-group {
+  margin-bottom: 14px;
+}
+#adminEditModal .form-group label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+#adminEditModal .form-group input[type="text"],
+#adminEditModal .form-group select {
+  width: 100%;
+  padding: 10px 12px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: var(--font);
+  font-size: 14px;
+  outline: none;
+  transition: border var(--transition);
+  box-sizing: border-box;
+}
+#adminEditModal .form-group input[type="text"]:focus,
+#adminEditModal .form-group select:focus {
+  border-color: var(--accent);
+}
+#adminEditModal .form-group input[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+#adminEditModal .toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0;
+}
+#adminEditModal .toggle-row span {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+#adminEditModal .modal-footer {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  padding: 16px 20px;
+  border-top: 1px solid var(--border);
+}

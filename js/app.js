@@ -1107,12 +1107,16 @@ await interaction.showModal(modal);`;
     sbClient.auth.getUser().then(({ data: { user } }) => {
       if (user) {
         const fresh = this._sbUserToLocal(user);
-        if (this.isAdmin() || fresh.admin || fresh.plan !== this.currentUser?.plan || fresh.username !== this.currentUser?.username) {
+        const changed = fresh.admin !== this.currentUser?.admin ||
+          fresh.plan !== this.currentUser?.plan ||
+          fresh.username !== this.currentUser?.username;
+        if (changed) {
+          console.log('[Auth] refreshUser: user updated', { admin: fresh.admin, plan: fresh.plan, username: fresh.username });
           this.currentUser = fresh;
           this.updateAuthUI();
         }
       }
-    }).catch(() => {});
+    }).catch(err => console.error('[Auth] refreshUser error:', err));
   }
 
   loadSession() {

@@ -63,7 +63,7 @@
         <div class="avatar" id="userAvatar">U</div>
         <div class="user-info">
           <div class="user-name" id="userName">Usuario</div>
-          <div class="user-plan" id="userPlan" data-i18n="free">Gratuito</div>
+          <div class="user-plan" id="userPlan">Gratuito</div>
         </div>
         <i class="fas fa-chevron-down" style="font-size:10px;color:var(--text-muted);"></i>
       </div>
@@ -520,7 +520,7 @@
             </div>
             <div class="form-group">
               <label data-i18n="admin.plan">Plan</label>
-              <select id="adminEditPlan" style="padding:8px 10px;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary);font-family:var(--font);font-size:13px;width:100%;outline:none;">
+              <select id="adminEditPlan">
                 <option value="free">Free</option>
                 <option value="pro">Pro</option>
                 <option value="premium">Premium</option>
@@ -554,16 +554,16 @@
             <div class="settings-row">
               <div>
                 <div class="settings-label" data-i18n="settings.user">Usuario</div>
-                <div class="settings-desc" id="settingsUsername" data-i18n="settings.notLogged">No has iniciado sesión</div>
+                <div class="settings-desc" id="settingsUsername">No has iniciado sesión</div>
               </div>
               <button class="btn-secondary" id="settingsLoginBtn"><i class="fas fa-sign-in-alt"></i> <span data-i18n="settings.login">Iniciar sesión</span></button>
             </div>
             <div class="settings-row">
               <div>
                 <div class="settings-label" data-i18n="settings.plan">Plan actual</div>
-                <div class="settings-desc" id="settingsPlan" data-i18n="settings.freePlan">Gratuito — 5 proyectos, 100 bloques por proyecto</div>
+                <div class="settings-desc" id="settingsPlan">Gratuito — 5 proyectos, 100 bloques por proyecto</div>
               </div>
-              <span class="settings-badge free" id="settingsBadge" data-i18n="free">Gratuito</span>
+              <span class="settings-badge free" id="settingsBadge">Gratuito</span>
             </div>
           </div>
           <div class="settings-section">
