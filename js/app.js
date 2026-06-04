@@ -1900,6 +1900,16 @@ await interaction.showModal(modal);`;
       if (e.target === this.dom.adminEditModal) this.closeAdminEdit();
     });
     this.dom.adminEditSave.addEventListener('click', () => this.saveAdminEdit());
+
+    // Event delegation para botones de editar en la tabla
+    this.dom.adminTableBody.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-admin-edit]');
+      if (btn) {
+        const id = btn.dataset.adminEdit;
+        const user = this.adminUsers.find(u => u.id === id);
+        if (user) this.openAdminEdit(user);
+      }
+    });
   }
 
   async loadAdminUsers() {
@@ -1951,14 +1961,6 @@ await interaction.showModal(modal);`;
         <td><button class="btn-icon" data-admin-edit="${u.id}"><i class="fas fa-edit"></i></button></td>
       </tr>`;
     }).join('');
-
-    tbody.querySelectorAll('[data-admin-edit]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const id = btn.dataset.adminEdit;
-        const user = this.adminUsers.find(u => u.id === id);
-        if (user) this.openAdminEdit(user);
-      });
-    });
   }
 
   filterAdminUsers() {
