@@ -729,6 +729,29 @@ gen['build_option'] = function(block) {
   return ['{ label: ' + label + ', value: ' + value + ', description: ' + desc + ' }', gen.ORDER_ATOMIC];
 };
 
+// ─── Paginación ───
+gen['send_paginated_embeds'] = function(block) {
+  const content = gen.valueToCode(block, 'CONTENT', gen.ORDER_ATOMIC) || "''";
+  const pages = gen.valueToCode(block, 'PAGES', gen.ORDER_ATOMIC) || '[]';
+  const ch = block.getFieldValue('CHANNEL') || 'current';
+  let channel = ch === 'current' ? 'message.channel' : "client.channels.cache.find(c => c.name === '" + ch + "')";
+  return `// PaginaciA3n
+const __pages = ${pages};
+let __page = 0;
+const __row = new ActionRowBuilder().addComponents(
+  new ButtonBuilder().setCustomId('__prev').setStyle(ButtonStyle.Primary).setEmoji('\u25C0'),
+  new ButtonBuilder().setCustomId('__next').setStyle(ButtonStyle.Primary).setEmoji('\u25B6')
+);
+const __msg = await ${channel}.send({ content: ${content}, embeds: [__pages[0]], components: [__row] });
+const __collector = __msg.createMessageComponentCollector({ time: 60000 });
+__collector.on('collect', async (interaction) => {
+  if (interaction.customId === '__prev') __page = Math.max(0, __page - 1);
+  else if (interaction.customId === '__next') __page = Math.min(__pages.length - 1, __page + 1);
+  await interaction.update({ embeds: [__pages[__page]] });
+});
+`;
+};
+
 // ─── Opciones de Comando ───
 gen['event_command_with_options'] = function(block) {
   const cmd = block.getFieldValue('COMMAND') || 'comando';

@@ -1495,6 +1495,13 @@ await interaction.showModal(modal);`;
           menuId: 'menu_' + Date.now(),
           channel: block.getFieldValue('CHANNEL') || 'current'
         };
+      case 'send_paginated_embeds':
+        return {
+          type: 'send_paginated_embeds',
+          content: this.evalInputValue(block, 'CONTENT', context) || '',
+          pages: this.evalArrayBlock(block.getInputTargetBlock('PAGES'), context) || [],
+          channel: block.getFieldValue('CHANNEL') || 'current'
+        };
       default:
         return { type: block.type };
     }

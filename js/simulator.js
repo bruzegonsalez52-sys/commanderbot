@@ -420,6 +420,9 @@ class DiscordSimulator {
       case 'send_select_menu':
         this.addMessage('bot', action.text || '', { selectMenu: action.options || [], menuId: action.menuId || 'menu_1' }, ch);
         break;
+      case 'send_paginated_embeds':
+        this.sendPaginatedEmbeds(action, ch);
+        break;
       case 'db_run':
         this.addMessage('system', '🗄️ DB: ' + (action.sql || '').substring(0, 80), null, cmdChannel);
         break;
@@ -444,6 +447,28 @@ class DiscordSimulator {
       if (!btn) return;
       const btnId = btn.dataset.id;
       if (!btnId) return;
+
+      // Pagination buttons
+      if (btnId === '__page_prev' || btnId === '__page_next') {
+        const msgDiv = btn.closest('.sim-msg');
+        if (!msgDiv) return;
+        const pagesRaw = msgDiv.dataset.pages;
+        if (!pagesRaw) return;
+        try {
+          const pages = JSON.parse(pagesRaw);
+          let current = parseInt(msgDiv.dataset.currentPage || '0');
+          if (btnId === '__page_prev') current = Math.max(0, current - 1);
+          else current = Math.min(pages.length - 1, current + 1);
+          msgDiv.dataset.currentPage = String(current);
+          const embed = typeof pages[current] === 'object' ? pages[current] : { title: 'Página ' + (current + 1), description: String(pages[current]) };
+          const embedEl = msgDiv.querySelector('.sim-embed');
+          if (embedEl) {
+            embedEl.outerHTML = this.renderEmbed(embed);
+          }
+        } catch {}
+        return;
+      }
+
       const key = '__btn_' + btnId;
       const cmdChannel = this.currentChannel;
       if (this.commands[key]) {
@@ -757,6 +782,28 @@ class DiscordSimulator {
     const div = document.createElement('div');
     div.textContent = str;
     return div.innerHTML;
+  }
+
+  // ─── Paginación ───
+  sendPaginatedEmbeds(action, cmdChannel) {
+    const pages = action.pages || [];
+    if (pages.length === 0) {
+      this.addMessage('bot', action.content || '(sin páginas)', null, cmdChannel);
+      return;
+    }
+    const firstEmbed = typeof pages[0] === 'object' ? pages[0] : { title: 'Página 1', description: String(pages[0]) };
+    this.addMessage('bot', action.content || '', {
+      embed: firstEmbed,
+      buttons: [
+        { id: '__page_prev', label: '◀', style: 'Primary' },
+        { id: '__page_next', label: '▶', style: 'Primary' }
+      ]
+    }, cmdChannel);
+    const lastMsg = this.dom.messages.lastElementChild;
+    if (lastMsg) {
+      lastMsg.dataset.pages = JSON.stringify(pages);
+      lastMsg.dataset.currentPage = '0';
+    }
   }
 
   // ─── Ayuda ───

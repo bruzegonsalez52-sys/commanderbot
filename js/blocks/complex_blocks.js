@@ -233,6 +233,23 @@ Blockly.defineBlocksWithJsonArray([
     "colour": 290,
     "tooltip": "Crea una opción para menú dinámico. label = texto visible, value = valor interno, desc = descripción opcional"
   },
+  // ─── Paginación ───
+  {
+    "type": "send_paginated_embeds",
+    "message0": "Enviar embeds paginados %1 texto %2 %3 páginas %4 %5 canal %6",
+    "args0": [
+      {"type": "input_dummy"},
+      {"type": "input_value", "name": "CONTENT", "check": "String"},
+      {"type": "input_dummy"},
+      {"type": "input_value", "name": "PAGES", "check": "Array"},
+      {"type": "input_dummy"},
+      {"type": "field_dropdown", "name": "CHANNEL", "options": [["canal actual", "current"], ["general", "general"]]}
+    ],
+    "colour": 290,
+    "tooltip": "Envía un mensaje con botones ◀ ▶ para navegar entre páginas. Las páginas deben ser un array de embeds creados con 'Crear embed'",
+    "previousStatement": null,
+    "nextStatement": null
+  },
   // ─── Opciones de Comando ───
   {
     "type": "event_command_with_options",
@@ -588,6 +605,15 @@ const COMPLEX_TOOLBOX_XML = `
     <block type="array_item"></block>
     <block type="array_push"></block>
     <block type="number_format"></block>
+  </category>
+  <category name="Paginación" colour="290">
+    <block type="send_paginated_embeds">
+      <value name="CONTENT">
+        <block type="text">
+          <field name="TEXT">Páginas:</field>
+        </block>
+      </value>
+    </block>
   </category>
 `;
 
