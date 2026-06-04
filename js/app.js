@@ -1901,8 +1901,6 @@ await interaction.showModal(modal);`;
     this.adminEditingId = null;
     this.adminUsers = [];
 
-    console.log('[Admin] initAdmin');
-
     this.dom.adminSearch.addEventListener('input', () => this.filterAdminUsers());
 
     this.dom.adminEditClose.addEventListener('click', () => this.closeAdminEdit());
@@ -1911,15 +1909,11 @@ await interaction.showModal(modal);`;
       if (e.target === this.dom.adminEditModal) this.closeAdminEdit();
     });
     this.dom.adminEditSave.addEventListener('click', () => this.saveAdminEdit());
+  }
 
-    // Event delegation para botones de editar en la tabla (document-level, nunca falla)
-    document.addEventListener('click', (e) => {
-      const btn = e.target.closest('#adminTableBody [data-admin-edit]');
-      if (!btn) return;
-      const id = btn.dataset.adminEdit;
-      const user = this.adminUsers.find(u => u.id === id);
-      if (user) this.openAdminEdit(user);
-    });
+  openAdminEditFromTable(id) {
+    const user = this.adminUsers.find(u => u.id === id);
+    if (user) this.openAdminEdit(user);
   }
 
   async loadAdminUsers() {
@@ -1973,7 +1967,7 @@ await interaction.showModal(modal);`;
         <td><span class="plan-badge ${plan}">${plan}</span></td>
         <td>${isAdmin ? '<span class="admin-badge"><i class="fas fa-check-circle"></i> ' + t('admin.yes') + '</span>' : t('admin.no')}</td>
         <td>${created}</td>
-        <td><button class="btn-icon" data-admin-edit="${u.id}"><i class="fas fa-edit"></i></button></td>
+        <td><button class="btn-icon" onclick="window.app.openAdminEditFromTable('${u.id}')"><i class="fas fa-edit"></i></button></td>
       </tr>`;
     }).join('');
   }
