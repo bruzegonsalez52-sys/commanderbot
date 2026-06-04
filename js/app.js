@@ -15,6 +15,8 @@ class DiscordBotBuilder {
     this.projects = this.loadProjects();
     this.currentProject = null;
     this.generatedCode = '';
+    this.deployCommandsCode = '';
+    this.exportTab = 'bot'; // 'bot' or 'deploy'
     this.blockCount = 0;
     this.init();
   }
@@ -28,6 +30,7 @@ class DiscordBotBuilder {
     this.bindAuth();
     this.renderProjects();
     this.updateHomeStats();
+    this.updateExportDisplay();
     // Show auth after a brief delay if not logged in
     setTimeout(() => {
       if (!this.currentUser) this.showAuth();
@@ -47,6 +50,9 @@ class DiscordBotBuilder {
       deleteBlocksBtn: document.getElementById('deleteBlocksBtn'),
       codeOutput: document.getElementById('generatedCode'),
       copyCodeBtn: document.getElementById('copyCodeBtn'),
+      exportTabBot: document.getElementById('exportTabBot'),
+      exportTabDeploy: document.getElementById('exportTabDeploy'),
+      exportLabel: document.getElementById('exportLabel'),
       projectsGrid: document.getElementById('projectsGrid'),
       newProjectBtn: document.getElementById('newProjectBtn'),
       emptyNewProjectBtn: document.getElementById('emptyNewProjectBtn'),
@@ -284,12 +290,24 @@ class DiscordBotBuilder {
     try {
       const rawCode = Blockly.JavaScript.workspaceToCode(this.workspace);
       this.generatedCode = this.wrapCode(rawCode);
+      this.deployCommandsCode = this.generateDeployCommands();
     } catch (e) {
       this.generatedCode = '// Error al generar código: ' + e.message;
+      this.deployCommandsCode = '// Error al generar deploy: ' + e.message;
     }
 
-    if (this.dom.codeOutput) {
-      this.dom.codeOutput.innerHTML = '<code>' + this.escapeHtml(this.generatedCode) + '</code>';
+    this.updateExportDisplay();
+  }
+
+  updateExportDisplay() {
+    if (!this.dom.codeOutput) return;
+    const showDeploy = this.exportTab === 'deploy';
+    const code = showDeploy ? this.deployCommandsCode : this.generatedCode;
+    this.dom.codeOutput.innerHTML = '<code>' + this.escapeHtml(code) + '</code>';
+    this.dom.exportLabel.textContent = showDeploy ? 'deploy-commands.js — Registro de comandos slash' : 'index.js — Código principal del bot';
+    if (this.dom.exportTabBot && this.dom.exportTabDeploy) {
+      this.dom.exportTabBot.className = showDeploy ? 'btn-secondary btn-sm' : 'btn-primary btn-sm active-tab';
+      this.dom.exportTabDeploy.className = showDeploy ? 'btn-primary btn-sm active-tab' : 'btn-secondary btn-sm';
     }
   }
 
@@ -333,6 +351,86 @@ ${this.extractModals(code)}
 });
 
 client.login(process.env.TOKEN);`;
+  }
+
+  generateDeployCommands() {
+    if (!this.workspace) return '// No hay workspace disponible';
+    const topBlocks = this.workspace.getTopBlocks(false);
+    const commands = [];
+
+    for (const block of topBlocks) {
+      if (block.type === 'event_command') {
+        const name = block.getFieldValue('COMMAND') || 'comando';
+        commands.push({ name, description: 'Comando /' + name, options: [] });
+      }
+      if (block.type === 'event_command_with_options') {
+        const name = block.getFieldValue('COMMAND') || 'comando';
+        const options = [];
+        let optBlock = block.getInputTargetBlock('OPTIONS');
+        while (optBlock) {
+          if (optBlock.type === 'command_option') {
+            const optName = optBlock.getFieldValue('NAME') || 'param';
+            const optType = optBlock.getFieldValue('TYPE') || 'String';
+            const optRequired = optBlock.getFieldValue('REQUIRED') === 'TRUE';
+            const optDesc = optBlock.getFieldValue('DESC') || 'Descripción';
+            const typeMap = { String: 3, Integer: 4, Boolean: 5, User: 6 };
+            options.push({
+              type: typeMap[optType] || 3,
+              name: optName,
+              description: optDesc,
+              required: optRequired
+            });
+          }
+          optBlock = optBlock.getNextBlock();
+        }
+        commands.push({ name, description: 'Comando /' + name, options });
+      }
+      if (block.type === 'event_command_with_subcommands') {
+        const name = block.getFieldValue('COMMAND') || 'comando';
+        const subOptions = [];
+        let subBlock = block.getInputTargetBlock('SUBCOMMANDS');
+        while (subBlock) {
+          if (subBlock.type === 'subcommand') {
+            const subName = subBlock.getFieldValue('NAME') || 'sub';
+            const descBlock = subBlock.getInputTargetBlock('DESC');
+            const desc = descBlock ? this.evalBlock(descBlock, {}) : 'Subcomando /' + name + ' ' + subName;
+            subOptions.push({
+              type: 1,
+              name: subName,
+              description: String(desc),
+              options: []
+            });
+          }
+          subBlock = subBlock.getNextBlock();
+        }
+        if (subOptions.length > 0) {
+          commands.push({ name, description: 'Comando /' + name, options: subOptions });
+        }
+      }
+    }
+
+    if (commands.length === 0) return '// No hay comandos definidos para desplegar';
+
+    const json = JSON.stringify(commands, null, 2);
+    return `const { REST, Routes } = require('discord.js');
+
+const commands = ${json};
+
+const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
+
+(async () => {
+  try {
+    console.log('🔄 Registrando ' + commands.length + ' comando(s)...');
+    await rest.put(
+      Routes.applicationCommands(process.env.CLIENT_ID),
+      { body: commands }
+    );
+    console.log('✅ Comandos registrados exitosamente');
+  } catch (error) {
+    console.error('❌ Error al registrar comandos:', error);
+  }
+})();
+`;
   }
 
   extractBlock(code, blockName) {
@@ -621,12 +719,26 @@ await interaction.showModal(modal);`;
     });
 
     this.dom.copyCodeBtn.addEventListener('click', () => {
-      navigator.clipboard.writeText(this.generatedCode).then(() => {
+      const code = this.exportTab === 'deploy' ? this.deployCommandsCode : this.generatedCode;
+      navigator.clipboard.writeText(code).then(() => {
         const orig = this.dom.copyCodeBtn.innerHTML;
         this.dom.copyCodeBtn.innerHTML = '<i class="fas fa-check"></i> Copiado';
         setTimeout(() => { this.dom.copyCodeBtn.innerHTML = orig; }, 2000);
       });
     });
+
+    if (this.dom.exportTabBot) {
+      this.dom.exportTabBot.addEventListener('click', () => {
+        this.exportTab = 'bot';
+        this.updateExportDisplay();
+      });
+    }
+    if (this.dom.exportTabDeploy) {
+      this.dom.exportTabDeploy.addEventListener('click', () => {
+        this.exportTab = 'deploy';
+        this.updateExportDisplay();
+      });
+    }
   }
 
   // ─── Proyectos ───

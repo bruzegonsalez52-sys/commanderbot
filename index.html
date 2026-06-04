@@ -445,10 +445,14 @@
       <section class="view" id="view-export">
         <div class="toolbar">
           <h1><i class="fas fa-code" style="color:var(--accent-2);margin-right:8px;"></i> Exportar Código</h1>
-          <button class="btn-primary" id="copyCodeBtn"><i class="fas fa-copy"></i> Copiar código</button>
+          <div style="display:flex;gap:6px;">
+            <button class="btn-primary btn-sm" id="exportTabBot" style="font-size:11px;padding:4px 10px;"><i class="fas fa-robot"></i> Bot</button>
+            <button class="btn-secondary btn-sm" id="exportTabDeploy" style="font-size:11px;padding:4px 10px;"><i class="fas fa-cloud-upload-alt"></i> Deploy</button>
+            <button class="btn-primary" id="copyCodeBtn" style="margin-left:8px;"><i class="fas fa-copy"></i> Copiar</button>
+          </div>
         </div>
         <div class="export-toolbar">
-          <span>El código se genera automáticamente desde tus bloques.</span>
+          <span id="exportLabel">Código principal del bot (index.js)</span>
         </div>
         <pre id="generatedCode"><code>// El código aparecerá aquí cuando programes con bloques</code></pre>
       </section>
