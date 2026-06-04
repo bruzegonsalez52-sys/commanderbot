@@ -1967,7 +1967,7 @@ await interaction.showModal(modal);`;
         <td><span class="plan-badge ${plan}">${plan}</span></td>
         <td>${isAdmin ? '<span class="admin-badge"><i class="fas fa-check-circle"></i> ' + t('admin.yes') + '</span>' : t('admin.no')}</td>
         <td>${created}</td>
-        <td><button class="btn-icon" onclick="window.app.openAdminEditFromTable('${u.id}')"><i class="fas fa-edit"></i></button></td>
+        <td><button class="btn-icon" onclick="adminEditUser('${u.id}')"><i class="fas fa-edit"></i></button></td>
       </tr>`;
     }).join('');
   }
@@ -2067,6 +2067,11 @@ window.generateEmbedCode = (embedJson) => {
 
 window.generateFormCode = (formData) => {
   if (window.app) window.app.generateFormCode(formData);
+};
+
+// ─── Admin: editar usuario desde tabla (función global para onclick inline) ───
+window.adminEditUser = function(id) {
+  if (window.app) window.app.openAdminEditFromTable(id);
 };
 
 // ─── Inicializar ───
