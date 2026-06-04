@@ -130,6 +130,21 @@ Blockly.defineBlocksWithJsonArray([
     "colour": 180,
     "tooltip": "Devuelve el ID de la última fila insertada con INSERT"
   },
+  // ─── Transacciones ───
+  {
+    "type": "db_transaction",
+    "message0": "Transacción %1 nombre %2 %3 %4",
+    "args0": [
+      {"type": "input_dummy"},
+      {"type": "field_input", "name": "NAME", "text": "transferencia"},
+      {"type": "input_dummy"},
+      {"type": "input_statement", "name": "DO"}
+    ],
+    "colour": 180,
+    "tooltip": "Ejecuta operaciones de DB de forma atómica. Si algo falla todo se revierte (rollback). Útil para transferencias de saldo, movimientos bancarios, etc.",
+    "previousStatement": null,
+    "nextStatement": null
+  },
   // ─── Menús Select ───
   {
     "type": "send_select_menu",
@@ -488,6 +503,9 @@ const COMPLEX_TOOLBOX_XML = `
       <field name="FIELD">balance</field>
     </block>
     <block type="db_last_id"></block>
+    <block type="db_transaction">
+      <field name="NAME">transferencia</field>
+    </block>
   </category>
   <category name="Menús Select" colour="290">
     <block type="send_select_menu">

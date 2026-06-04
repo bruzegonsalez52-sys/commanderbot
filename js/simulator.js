@@ -426,6 +426,12 @@ class DiscordSimulator {
       case 'db_create_table':
         this.addMessage('system', '🗄️ Tabla "' + (action.table || '') + '" creada', null, cmdChannel);
         break;
+      case '_transaction_commit':
+        this.addMessage('system', '✅ Transacción "' + (action.name || '') + '" completada (commit)', null, cmdChannel);
+        break;
+      case '_transaction_rollback':
+        this.addMessage('system', '⚠️ Transacción "' + (action.name || '') + '" revertida (rollback)', null, cmdChannel);
+        break;
       default:
         this.addMessage('bot', '⚙️ Acción: ' + action.type, null, cmdChannel);
     }

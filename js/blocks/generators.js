@@ -669,6 +669,13 @@ gen['db_last_id'] = function(block) {
   return ['(db.prepare("SELECT last_insert_rowid() as id").get()?.id || 0)', gen.ORDER_MEMBER];
 };
 
+// ─── Transacciones ───
+gen['db_transaction'] = function(block) {
+  const name = block.getFieldValue('NAME') || 'transaccion';
+  const body = gen.statementToCode(block, 'DO');
+  return `// TransacciA3n: ${name}\ndb.transaction(() => {\n${body}});\n`;
+};
+
 // ─── Select Menus ───
 gen['send_select_menu'] = function(block) {
   const text = gen.valueToCode(block, 'TEXT', gen.ORDER_ATOMIC) || "''";

@@ -1102,6 +1102,24 @@ await interaction.showModal(modal);`;
           });
         }, secs * 1000);
         actions.push({ type: '_scheduled', seconds: secs });
+      } else if (block.type === 'db_transaction') {
+        const name = block.getFieldValue('NAME') || 'transaccion';
+        const db = window.simulator?.db;
+        if (db) {
+          const savedState = JSON.parse(JSON.stringify(db.tables));
+          const savedId = db.lastId;
+          try {
+            this.traverseStatements(block.getInputTargetBlock('DO'), actions, Object.assign({}, context));
+            actions.push({ type: '_transaction_commit', name });
+          } catch (e) {
+            db.tables = savedState;
+            db.lastId = savedId;
+            actions.push({ type: '_transaction_rollback', name });
+          }
+        } else {
+          this.traverseStatements(block.getInputTargetBlock('DO'), actions, Object.assign({}, context));
+          actions.push({ type: '_transaction_commit', name });
+        }
       } else if (block.type === 'raw_javascript') {
         const code = block.getFieldValue('CODE') || '';
         actions.push({ type: '_raw_js', code });
