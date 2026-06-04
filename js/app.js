@@ -668,6 +668,11 @@ await interaction.showModal(modal);`;
         }
       }
 
+      // Cargar admin cuando se abra la vista
+      if (view === 'admin') {
+        this.loadAdminUsers();
+      }
+
       // Cerrar dropdown después de navegar
       document.querySelectorAll('.nav-dropdown.open').forEach(d => d.classList.remove('open'));
       document.querySelectorAll('.nav-expand.open').forEach(e => e.classList.remove('open'));
@@ -1895,8 +1900,6 @@ await interaction.showModal(modal);`;
       if (e.target === this.dom.adminEditModal) this.closeAdminEdit();
     });
     this.dom.adminEditSave.addEventListener('click', () => this.saveAdminEdit());
-
-    this.loadAdminUsers();
   }
 
   async loadAdminUsers() {
