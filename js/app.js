@@ -1901,6 +1901,8 @@ await interaction.showModal(modal);`;
     this.adminEditingId = null;
     this.adminUsers = [];
 
+    console.log('[Admin] initAdmin');
+
     this.dom.adminSearch.addEventListener('input', () => this.filterAdminUsers());
 
     this.dom.adminEditClose.addEventListener('click', () => this.closeAdminEdit());
@@ -1910,14 +1912,13 @@ await interaction.showModal(modal);`;
     });
     this.dom.adminEditSave.addEventListener('click', () => this.saveAdminEdit());
 
-    // Event delegation para botones de editar en la tabla
-    this.dom.adminTableBody.addEventListener('click', (e) => {
-      const btn = e.target.closest('[data-admin-edit]');
-      if (btn) {
-        const id = btn.dataset.adminEdit;
-        const user = this.adminUsers.find(u => u.id === id);
-        if (user) this.openAdminEdit(user);
-      }
+    // Event delegation para botones de editar en la tabla (document-level, nunca falla)
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest('#adminTableBody [data-admin-edit]');
+      if (!btn) return;
+      const id = btn.dataset.adminEdit;
+      const user = this.adminUsers.find(u => u.id === id);
+      if (user) this.openAdminEdit(user);
     });
   }
 
