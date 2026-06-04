@@ -1932,7 +1932,7 @@ await interaction.showModal(modal);`;
   renderAdminTable(users) {
     const tbody = this.dom.adminTableBody;
     if (!users.length) {
-      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text-muted);"><i class="fas fa-inbox"></i> ' + t('admin.noUsers', 'No hay usuarios') + '</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text-muted);"><i class="fas fa-inbox"></i> ' + t('admin.noUsers') + '</td></tr>';
       return;
     }
     tbody.innerHTML = users.map(u => {
