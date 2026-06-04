@@ -768,6 +768,19 @@ gen['get_option'] = function(block) {
   return ['interaction.options.get("' + name + '")?.value || ""', gen.ORDER_MEMBER];
 };
 
+gen['defer_reply'] = function(block) {
+  const ephemeral = block.getFieldValue('EPHEMERAL') === 'TRUE';
+  if (ephemeral) {
+    return 'await interaction.deferReply({ ephemeral: true });\n';
+  }
+  return 'await interaction.deferReply();\n';
+};
+
+gen['edit_reply'] = function(block) {
+  const content = gen.valueToCode(block, 'CONTENT', gen.ORDER_ATOMIC) || "''";
+  return 'await interaction.editReply(' + content + ');\n';
+};
+
 // ─── Subcomandos ───
 gen['event_command_with_subcommands'] = function(block) {
   const cmd = block.getFieldValue('COMMAND') || 'comando';

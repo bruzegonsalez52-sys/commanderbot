@@ -450,6 +450,31 @@ Blockly.defineBlocksWithJsonArray([
     "colour": 60,
     "tooltip": "Añade un elemento al final del array y devuelve el array actualizado"
   },
+  // ─── Respuestas diferidas ───
+  {
+    "type": "defer_reply",
+    "message0": "Diferir respuesta %1 efímero %2",
+    "args0": [
+      {"type": "input_dummy"},
+      {"type": "field_checkbox", "name": "EPHEMERAL", "checked": false}
+    ],
+    "colour": 120,
+    "tooltip": "Reconoce la interacción y difiere la respuesta para operaciones lentas (más de 3 segundos). El bot puede responder después con 'Editar respuesta'",
+    "previousStatement": null,
+    "nextStatement": null
+  },
+  {
+    "type": "edit_reply",
+    "message0": "Editar respuesta %1 %2",
+    "args0": [
+      {"type": "input_dummy"},
+      {"type": "input_value", "name": "CONTENT", "check": "String"}
+    ],
+    "colour": 120,
+    "tooltip": "Edita la respuesta de una interacción diferida. Usa 'Diferir respuesta' primero. Ej: 'Listo, proceso completado'",
+    "previousStatement": null,
+    "nextStatement": null
+  },
   // ─── Temporizadores ───
   {
     "type": "schedule_after",
@@ -570,6 +595,14 @@ const COMPLEX_TOOLBOX_XML = `
     </block>
     <block type="get_option">
       <field name="NAME">usuario</field>
+    </block>
+    <block type="defer_reply"/>
+    <block type="edit_reply">
+      <value name="CONTENT">
+        <block type="text">
+          <field name="TEXT">Procesando...</field>
+        </block>
+      </value>
     </block>
   </category>
   <category name="Subcomandos" colour="195">

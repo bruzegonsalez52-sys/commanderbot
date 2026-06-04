@@ -1614,6 +1614,10 @@ await interaction.showModal(modal);`;
           pages: this.evalArrayBlock(block.getInputTargetBlock('PAGES'), context) || [],
           channel: block.getFieldValue('CHANNEL') || 'current'
         };
+      case 'defer_reply':
+        return { type: 'defer_reply', ephemeral: block.getFieldValue('EPHEMERAL') === 'TRUE' };
+      case 'edit_reply':
+        return { type: 'edit_reply', text: this.evalInputValue(block, 'CONTENT', context) || '' };
       default:
         return { type: block.type };
     }

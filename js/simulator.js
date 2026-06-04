@@ -435,6 +435,12 @@ class DiscordSimulator {
       case '_transaction_rollback':
         this.addMessage('system', '⚠️ Transacción "' + (action.name || '') + '" revertida (rollback)', null, cmdChannel);
         break;
+      case 'defer_reply':
+        this.addMessage('system', '⏳ Respuesta diferida' + (action.ephemeral ? ' (efímera)' : ''), null, cmdChannel);
+        break;
+      case 'edit_reply':
+        this.addMessage('bot', '✏️ Respuesta editada: ' + (action.text || ''), null, cmdChannel);
+        break;
       default:
         this.addMessage('bot', '⚙️ Acción: ' + action.type, null, cmdChannel);
     }
