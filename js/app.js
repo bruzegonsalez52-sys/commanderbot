@@ -1967,9 +1967,19 @@ await interaction.showModal(modal);`;
         <td><span class="plan-badge ${plan}">${plan}</span></td>
         <td>${isAdmin ? '<span class="admin-badge"><i class="fas fa-check-circle"></i> ' + t('admin.yes') + '</span>' : t('admin.no')}</td>
         <td>${created}</td>
-        <td><button class="btn-icon" onclick="adminEditUser('${u.id}')"><i class="fas fa-edit"></i></button></td>
+        <td><button class="btn-icon edit-user-btn" data-uid="${u.id}" type="button"><i class="fas fa-edit"></i></button></td>
       </tr>`;
     }).join('');
+
+    // Vincular click directamente a cada botón después de renderizar
+    tbody.querySelectorAll('.edit-user-btn').forEach(btn => {
+      btn.onclick = (e) => {
+        e.preventDefault();
+        const id = btn.getAttribute('data-uid');
+        const user = this.adminUsers.find(u => u.id === id);
+        if (user) this.openAdminEdit(user);
+      };
+    });
   }
 
   filterAdminUsers() {
