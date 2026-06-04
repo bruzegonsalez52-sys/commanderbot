@@ -311,8 +311,8 @@ class DiscordBotBuilder {
       this.generatedCode = this.wrapCode(rawCode);
       this.deployCommandsCode = this.generateDeployCommands();
     } catch (e) {
-      this.generatedCode = '// Error al generar código: ' + e.message;
-      this.deployCommandsCode = '// Error al generar deploy: ' + e.message;
+      this.generatedCode = '// ' + t('block.codeError') + e.message;
+      this.deployCommandsCode = '// ' + t('block.noDeploy') + e.message;
     }
 
     this.updateExportDisplay();
@@ -323,7 +323,7 @@ class DiscordBotBuilder {
     const showDeploy = this.exportTab === 'deploy';
     const code = showDeploy ? this.deployCommandsCode : this.generatedCode;
     this.dom.codeOutput.innerHTML = '<code>' + this.escapeHtml(code) + '</code>';
-    this.dom.exportLabel.textContent = showDeploy ? 'deploy-commands.js — Registro de comandos slash' : 'index.js — Código principal del bot';
+    this.dom.exportLabel.textContent = showDeploy ? t('export.deployLabel') : t('export.label');
     if (this.dom.exportTabBot && this.dom.exportTabDeploy) {
       this.dom.exportTabBot.className = showDeploy ? 'btn-secondary btn-sm' : 'btn-primary btn-sm active-tab';
       this.dom.exportTabDeploy.className = showDeploy ? 'btn-primary btn-sm active-tab' : 'btn-secondary btn-sm';
@@ -373,7 +373,7 @@ client.login(process.env.TOKEN);`;
   }
 
   generateDeployCommands() {
-    if (!this.workspace) return '// No hay workspace disponible';
+    if (!this.workspace) return '// ' + t('block.noWorkspace');
     const topBlocks = this.workspace.getTopBlocks(false);
     const commands = [];
 
@@ -428,7 +428,7 @@ client.login(process.env.TOKEN);`;
       }
     }
 
-    if (commands.length === 0) return '// No hay comandos definidos para desplegar';
+    if (commands.length === 0) return '// ' + t('block.noCommands');
 
     const json = JSON.stringify(commands, null, 2);
     return `const { REST, Routes } = require('discord.js');
@@ -741,7 +741,7 @@ await interaction.showModal(modal);`;
       const code = this.exportTab === 'deploy' ? this.deployCommandsCode : this.generatedCode;
       navigator.clipboard.writeText(code).then(() => {
         const orig = this.dom.copyCodeBtn.innerHTML;
-        this.dom.copyCodeBtn.innerHTML = '<i class="fas fa-check"></i> Copiado';
+        this.dom.copyCodeBtn.innerHTML = '<i class="fas fa-check"></i> ' + t('copied');
         setTimeout(() => { this.dom.copyCodeBtn.innerHTML = orig; }, 2000);
       });
     });
@@ -930,7 +930,7 @@ await interaction.showModal(modal);`;
       const email = this.dom.loginEmail.value.trim();
       const password = this.dom.loginPassword.value;
       if (!email || !password) {
-        this.dom.loginError.textContent = 'Completa todos los campos.';
+        this.dom.loginError.textContent = t('auth.fullFields');
         this.dom.loginError.style.display = 'block';
         return;
       }
@@ -938,7 +938,7 @@ await interaction.showModal(modal);`;
       const { data, error } = await sbClient.auth.signInWithPassword({ email, password });
       if (error) {
         this.dom.loginError.textContent = error.message === 'Invalid login credentials'
-          ? 'Correo o contraseña incorrectos.'
+          ? t('auth.wrongCredentials')
           : error.message;
         this.dom.loginError.style.display = 'block';
         return;
@@ -956,17 +956,17 @@ await interaction.showModal(modal);`;
       const password = this.dom.registerPassword.value;
       const confirm = this.dom.registerConfirm.value;
       if (!email || !username || !password || !confirm) {
-        this.dom.registerError.textContent = 'Completa todos los campos.';
+        this.dom.registerError.textContent = t('auth.fullFields');
         this.dom.registerError.style.display = 'block';
         return;
       }
       if (password.length < 6) {
-        this.dom.registerError.textContent = 'La contraseña debe tener al menos 6 caracteres.';
+        this.dom.registerError.textContent = t('auth.minLength');
         this.dom.registerError.style.display = 'block';
         return;
       }
       if (password !== confirm) {
-        this.dom.registerError.textContent = 'Las contraseñas no coinciden.';
+        this.dom.registerError.textContent = t('auth.passMismatch');
         this.dom.registerError.style.display = 'block';
         return;
       }
@@ -986,7 +986,7 @@ await interaction.showModal(modal);`;
       // Manually sign in after signup (user is auto-confirmed)
       const { data: signInData, error: signInError } = await sbClient.auth.signInWithPassword({ email, password });
       if (signInError) {
-        this.dom.registerError.textContent = 'Cuenta creada. Inicia sesión manualmente.';
+        this.dom.registerError.textContent = t('auth.registered');
         this.dom.registerError.style.display = 'block';
         return;
       }
@@ -999,7 +999,7 @@ await interaction.showModal(modal);`;
     this.dom.forgotPasswordBtn?.addEventListener('click', () => {
       const email = this.dom.loginEmail.value.trim();
       if (!email) {
-        this.dom.loginError.textContent = 'Ingresa tu correo primero.';
+        this.dom.loginError.textContent = t('auth.emailFirst');
         this.dom.loginError.style.display = 'block';
         return;
       }
@@ -1008,7 +1008,7 @@ await interaction.showModal(modal);`;
           this.dom.loginError.textContent = error.message;
           this.dom.loginError.style.display = 'block';
         } else {
-          this.dom.loginError.textContent = '✅ Revisa tu correo para restablecer la contraseña.';
+          this.dom.loginError.textContent = t('auth.checkEmail');
           this.dom.loginError.style.display = 'block';
         }
       });
@@ -1017,7 +1017,7 @@ await interaction.showModal(modal);`;
     // Settings login button (toggle logout/login)
     this.dom.settingsLoginBtn?.addEventListener('click', () => {
       if (this.currentUser) {
-        if (confirm('¿Cerrar sesión?')) this.clearSession();
+        if (confirm(t('settings.logoutConfirm'))) this.clearSession();
       } else {
         this.showAuth();
       }
@@ -1125,28 +1125,30 @@ await interaction.showModal(modal);`;
       this.dom.sidebarUser.style.display = 'flex';
       this.dom.userName.textContent = this.currentUser.username;
       const plan = this.currentUser.plan || 'free';
-      const planLabels = { free: 'Gratuito', pro: 'Pro', premium: 'Premium' };
-      this.dom.userPlan.textContent = planLabels[plan] || 'Gratuito';
+      const planLabels = { free: t('free'), pro: t('pro'), premium: t('premium') };
+      this.dom.userPlan.textContent = planLabels[plan] || t('free');
       if (plan === 'premium') this.dom.userPlan.className = 'user-plan premium';
       else this.dom.userPlan.className = 'user-plan';
       const initials = this.currentUser.username.substring(0, 2).toUpperCase();
       this.dom.userAvatar.textContent = initials;
       this.dom.settingsUsername.textContent = this.currentUser.username;
-      const planDesc = plan === 'free' ? 'Gratuito — 5 proyectos, 100 bloques/proyecto'
-        : plan === 'pro' ? 'Pro — Proyectos ilimitados, todos los bloques'
-        : 'Premium — Todo incluido';
+      const planDesc = plan === 'free' ? t('settings.freePlan')
+        : plan === 'pro' ? t('settings.proPlan')
+        : t('settings.premiumPlan');
       this.dom.settingsPlan.textContent = planDesc;
-      this.dom.settingsBadge.textContent = planLabels[plan] || 'Gratuito';
+      this.dom.settingsBadge.textContent = planLabels[plan] || t('free');
       this.dom.settingsBadge.className = 'settings-badge ' + plan;
-      this.dom.settingsLoginBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Cerrar sesión';
+      this.dom.settingsLoginBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> ' + t('settings.logout');
     } else {
       this.dom.sidebarUser.style.display = 'none';
-      this.dom.settingsUsername.textContent = 'No has iniciado sesión';
-      this.dom.settingsPlan.textContent = 'Gratuito — 5 proyectos, bloques básicos';
-      this.dom.settingsBadge.textContent = 'Gratuito';
+      this.dom.settingsUsername.textContent = t('settings.notLogged');
+      this.dom.settingsPlan.textContent = t('settings.freePlan');
+      this.dom.settingsBadge.textContent = t('free');
       this.dom.settingsBadge.className = 'settings-badge free';
-      this.dom.settingsLoginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Iniciar sesión';
+      this.dom.settingsLoginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> ' + t('settings.login');
     }
+    // Update data-i18n elements that were translated via attributes
+    translatePage();
   }
 
   // ─── Extraer comandos del workspace para el simulador ───
