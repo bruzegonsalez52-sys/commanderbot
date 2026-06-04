@@ -48,6 +48,7 @@ class DiscordBotBuilder {
     this.updateHomeStats();
     this.updateExportDisplay();
     this.updateAuthUI();
+    this.refreshUser();
     // Show auth after a brief delay if not logged in
     setTimeout(() => {
       if (!this.currentUser) this.showAuth();
@@ -1069,18 +1070,31 @@ await interaction.showModal(modal);`;
   _sbUserToLocal(sbUser) {
     if (!sbUser) return null;
     const meta = sbUser.user_metadata || {};
+    const isAdmin = meta.admin === true;
     return {
       id: sbUser.id,
       email: sbUser.email,
       username: meta.username || sbUser.email?.split('@')[0] || 'Usuario',
-      plan: meta.plan || 'free',
-      admin: meta.admin === true,
+      plan: isAdmin ? 'premium' : (meta.plan || 'free'),
+      admin: isAdmin,
       createdAt: sbUser.created_at
     };
   }
 
   isAdmin() {
     return this.currentUser && this.currentUser.admin === true;
+  }
+
+  refreshUser() {
+    sbClient.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        const fresh = this._sbUserToLocal(user);
+        if (this.isAdmin() || fresh.admin || fresh.plan !== this.currentUser?.plan || fresh.username !== this.currentUser?.username) {
+          this.currentUser = fresh;
+          this.updateAuthUI();
+        }
+      }
+    }).catch(() => {});
   }
 
   loadSession() {
