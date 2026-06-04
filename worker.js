@@ -1,4 +1,5 @@
 const SUPABASE_URL = 'https://onnwozcmmudsdcypletl.supabase.co';
+const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ubndvemNtbXVkc2RjeXBsZXRsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1MjQ0NTUsImV4cCI6MjA5NjEwMDQ1NX0.eCczc66uROZgpXYDU5BBOvhGQrK6IvLIRm_88xqs1no';
 
 export default {
   async fetch(request, env, ctx) {
@@ -18,7 +19,7 @@ async function handleAdminAPI(request, env) {
   const userJwt = authHeader.slice(7);
 
   const userResp = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
-    headers: { Authorization: `Bearer ${userJwt}`, apikey: userJwt }
+    headers: { Authorization: `Bearer ${userJwt}`, apikey: ANON_KEY }
   });
   if (!userResp.ok) return json({ error: 'Invalid token' }, 401);
   const userData = await userResp.json();
