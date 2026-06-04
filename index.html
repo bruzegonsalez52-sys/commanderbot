@@ -504,41 +504,62 @@
 
       <!-- Admin Edit Modal -->
       <div class="modal-overlay" id="adminEditModal" style="display:none;">
-        <div class="modal" style="max-width:420px;">
+        <div class="modal admin-modal">
           <div class="modal-header">
-            <h3 data-i18n="admin.editUser">Editar Usuario</h3>
+            <h3 data-i18n="admin.editUser">Gestionar Perfil</h3>
             <button class="modal-close" id="adminEditClose">&times;</button>
           </div>
-          <div class="modal-body">
-            <div class="form-group">
-              <label data-i18n="admin.email">Email</label>
-              <input type="text" id="adminEditEmail" disabled style="opacity:0.6;">
+          <div class="modal-body admin-modal-body">
+            <div class="admin-modal-user" id="adminModalUserHeader">
+              <div class="admin-modal-avatar" id="adminEditAvatar">U</div>
+              <div>
+                <div class="admin-modal-name" id="adminEditDisplayName">Usuario</div>
+                <div class="admin-modal-id" id="adminEditDisplayId">ID: —</div>
+              </div>
             </div>
-            <div class="form-group">
-              <label data-i18n="admin.username">Usuario</label>
-              <input type="text" id="adminEditUsername">
+            <div class="admin-modal-section">
+              <div class="admin-modal-section-title"><i class="fas fa-info-circle"></i> <span data-i18n="admin.accountInfo">Información de la cuenta</span></div>
+              <div class="admin-modal-row">
+                <span class="admin-modal-label" data-i18n="admin.email">Email</span>
+                <input type="text" id="adminEditEmail" disabled>
+              </div>
+              <div class="admin-modal-row">
+                <span class="admin-modal-label" data-i18n="admin.created">Creado</span>
+                <span class="admin-modal-value" id="adminEditCreated">—</span>
+              </div>
+              <div class="admin-modal-row">
+                <span class="admin-modal-label" data-i18n="admin.lastSignIn">Último acceso</span>
+                <span class="admin-modal-value" id="adminEditLastSignIn">—</span>
+              </div>
             </div>
-            <div class="form-group">
-              <label data-i18n="admin.plan">Plan</label>
-              <select id="adminEditPlan">
-                <option value="free">Free</option>
-                <option value="pro">Pro</option>
-                <option value="premium">Premium</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label class="toggle-row">
-                <span data-i18n="admin.admin">Admin</span>
+            <div class="admin-modal-section">
+              <div class="admin-modal-section-title"><i class="fas fa-sliders"></i> <span data-i18n="admin.profileSettings">Configuración del perfil</span></div>
+              <div class="admin-modal-row">
+                <span class="admin-modal-label" data-i18n="admin.username">Usuario</span>
+                <input type="text" id="adminEditUsername" placeholder="Nombre de usuario">
+              </div>
+              <div class="admin-modal-row">
+                <span class="admin-modal-label" data-i18n="admin.plan">Plan</span>
+                <div class="admin-modal-plan-select">
+                  <select id="adminEditPlan">
+                    <option value="free">Free</option>
+                    <option value="pro">Pro — $9/mes</option>
+                    <option value="premium">Premium — $19/mes</option>
+                  </select>
+                </div>
+              </div>
+              <div class="admin-modal-row">
+                <span class="admin-modal-label" data-i18n="admin.admin">Administrador</span>
                 <label class="toggle-switch">
                   <input type="checkbox" id="adminEditAdminToggle">
                   <span class="toggle-slider"></span>
                 </label>
-              </label>
+              </div>
             </div>
           </div>
           <div class="modal-footer">
             <button class="btn-secondary" id="adminEditCancel" data-i18n="admin.cancel">Cancelar</button>
-            <button class="btn-primary" id="adminEditSave" data-i18n="admin.save">Guardar</button>
+            <button class="btn-primary" id="adminEditSave" data-i18n="admin.save">Guardar Cambios</button>
           </div>
         </div>
       </div>

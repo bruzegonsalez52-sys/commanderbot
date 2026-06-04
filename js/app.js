@@ -106,7 +106,12 @@ class DiscordBotBuilder {
       adminEditAdminToggle: document.getElementById('adminEditAdminToggle'),
       adminEditClose: document.getElementById('adminEditClose'),
       adminEditCancel: document.getElementById('adminEditCancel'),
-      adminEditSave: document.getElementById('adminEditSave')
+      adminEditSave: document.getElementById('adminEditSave'),
+      adminEditAvatar: document.getElementById('adminEditAvatar'),
+      adminEditDisplayName: document.getElementById('adminEditDisplayName'),
+      adminEditDisplayId: document.getElementById('adminEditDisplayId'),
+      adminEditCreated: document.getElementById('adminEditCreated'),
+      adminEditLastSignIn: document.getElementById('adminEditLastSignIn')
     };
   }
 
@@ -1996,6 +2001,15 @@ await interaction.showModal(modal);`;
     this.dom.adminEditUsername.value = meta.username || '';
     this.dom.adminEditPlan.value = meta.plan || 'free';
     this.dom.adminEditAdminToggle.checked = meta.admin === true;
+
+    // Datos adicionales del modal mejorado
+    const name = meta.username || (user.email ? user.email.split('@')[0] : 'Usuario');
+    this.dom.adminEditAvatar.textContent = name.substring(0, 2).toUpperCase();
+    this.dom.adminEditDisplayName.textContent = name;
+    this.dom.adminEditDisplayId.textContent = 'ID: ' + (user.id ? user.id.substring(0, 8) + '...' : '—');
+    this.dom.adminEditCreated.textContent = user.created_at ? new Date(user.created_at).toLocaleDateString() : '—';
+    this.dom.adminEditLastSignIn.textContent = user.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleDateString() : '—';
+
     this.dom.adminEditModal.style.display = 'flex';
   }
 
@@ -2035,6 +2049,14 @@ await interaction.showModal(modal);`;
       }
       this.closeAdminEdit();
       alert(t('admin.saved'));
+      // Si editamos nuestro propio perfil, actualizar UI inmediatamente
+      if (this.currentUser && this.adminEditingId === this.currentUser.id) {
+        this.currentUser.username = username;
+        this.currentUser.plan = plan;
+        this.currentUser.admin = admin;
+        this.currentUser = this._sbUserToLocal({ id: this.currentUser.id, email: this.currentUser.email, user_metadata: { username, plan, admin } });
+        this.updateAuthUI();
+      }
       this.loadAdminUsers();
     } catch (err) {
       console.error('Admin save error:', err);

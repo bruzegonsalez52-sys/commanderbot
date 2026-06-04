@@ -210,7 +210,10 @@ const LANG = {
     'admin.loadError': 'Error al cargar usuarios',
     'admin.yes': 'Sí',
     'admin.no': 'No',
-    'admin.noUsers': 'No hay usuarios'
+    'admin.noUsers': 'No hay usuarios',
+    'admin.lastSignIn': 'Último acceso',
+    'admin.accountInfo': 'Información de la cuenta',
+    'admin.profileSettings': 'Configuración del perfil'
   },
 
   en: {
@@ -421,7 +424,10 @@ const LANG = {
     'admin.loadError': 'Error loading users',
     'admin.yes': 'Yes',
     'admin.no': 'No',
-    'admin.noUsers': 'No users'
+    'admin.noUsers': 'No users',
+    'admin.lastSignIn': 'Last sign in',
+    'admin.accountInfo': 'Account info',
+    'admin.profileSettings': 'Profile settings'
   }
 };
 
