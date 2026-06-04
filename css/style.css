@@ -1306,3 +1306,22 @@ html, body {
 /* ─── Misc Utilities ─── */
 .text-gradient { background: var(--gradient-1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
 .glass-card { background: var(--bg-glass); backdrop-filter: blur(8px); border: 1px solid var(--border); border-radius: var(--radius-lg); }
+
+/* ─── Light Theme ─── */
+:root.light {
+  --bg-primary: #f0eef6;
+  --bg-secondary: #e8e4f0;
+  --bg-tertiary: #ddd8ea;
+  --bg-card: rgba(255, 255, 255, 0.85);
+  --bg-glass: rgba(255, 255, 255, 0.7);
+  --bg-glass-strong: rgba(255, 255, 255, 0.85);
+  --text-primary: #1a1a2e;
+  --text-secondary: #5a5580;
+  --text-muted: #8a86aa;
+  --border: rgba(0, 0, 0, 0.08);
+  --border-hover: rgba(0, 0, 0, 0.15);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 8px 32px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.1);
+  --shadow-glow: 0 0 30px rgba(124, 92, 252, 0.1);
+}

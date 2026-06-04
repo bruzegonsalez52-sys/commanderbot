@@ -1040,6 +1040,23 @@ await interaction.showModal(modal);`;
       });
     });
 
+    // Toggle dark mode
+    document.getElementById('toggleDarkMode')?.addEventListener('change', (e) => {
+      if (e.target.checked) {
+        document.documentElement.classList.remove('light');
+      } else {
+        document.documentElement.classList.add('light');
+      }
+      localStorage.setItem('commanderbot_dark_mode', e.target.checked ? '1' : '0');
+    });
+
+    // Restore dark mode preference
+    const darkModePref = localStorage.getItem('commanderbot_dark_mode');
+    if (darkModePref === '0') {
+      document.getElementById('toggleDarkMode').checked = false;
+      document.documentElement.classList.add('light');
+    }
+
     // Listen for auth state changes
     sbClient.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_OUT') {
