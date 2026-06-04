@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CommanderBot — Creador Visual de Bots</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/blockly@10.4.3/blockly.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/blockly@10.4.3/blocks_compressed.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/blockly@10.4.3/javascript_compressed.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/blockly@10.4.3/msg/es.js"></script>
+</head>
+<body>
+  <div class="bg-mesh"></div>
+  <div class="bg-dots"></div>
+
+  <div id="app">
+    <!-- ─── Auth Modal ─── -->
+    <div class="auth-overlay" id="authOverlay">
+      <div class="auth-modal">
+        <div class="auth-tabs">
+          <button class="auth-tab active" data-auth="login">Iniciar Sesión</button>
+          <button class="auth-tab" data-auth="register">Crear Cuenta</button>
+        </div>
+        <form class="auth-form active" id="loginForm" autocomplete="off">
+          <h2>Bienvenido de nuevo</h2>
+          <p>Ingresa a tu cuenta para gestionar tus bots.</p>
+          <input class="auth-input" type="text" id="loginUsername" placeholder="Nombre de usuario" required>
+          <input class="auth-input" type="password" id="loginPassword" placeholder="Contraseña" required>
+          <div class="auth-error" id="loginError"></div>
+          <button class="auth-btn" type="submit">Iniciar Sesión</button>
+          <div class="auth-divider"></div>
+          <div class="auth-demo">
+            <button type="button" id="demoLoginBtn">Usar cuenta de demostración</button>
+          </div>
+        </form>
+        <form class="auth-form" id="registerForm" autocomplete="off">
+          <h2>Crear tu cuenta</h2>
+          <p>Regístrate gratis y empieza a crear bots.</p>
+          <input class="auth-input" type="text" id="registerUsername" placeholder="Nombre de usuario" required>
+          <input class="auth-input" type="password" id="registerPassword" placeholder="Contraseña (mín. 6 caracteres)" required>
+          <input class="auth-input" type="password" id="registerConfirm" placeholder="Confirmar contraseña" required>
+          <div class="auth-error" id="registerError"></div>
+          <button class="auth-btn" type="submit">Crear Cuenta Gratis</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- ─── Sidebar ─── -->
+    <aside class="sidebar">
+      <div class="logo">
+        <div class="logo-icon"><i class="fas fa-terminal"></i></div>
+        <span class="logo-text">CommanderBot</span>
+      </div>
+      <div class="sidebar-user" id="sidebarUser" style="display:none;">
+        <div class="avatar" id="userAvatar">U</div>
+        <div class="user-info">
+          <div class="user-name" id="userName">Usuario</div>
+          <div class="user-plan" id="userPlan">Gratuito</div>
+        </div>
+        <i class="fas fa-chevron-down" style="font-size:10px;color:var(--text-muted);"></i>
+      </div>
+      <nav class="sidebar-nav" id="sidebarNav">
+        <div class="nav-section">
+          <div class="nav-section-header active-nav" data-view="home">
+            <span class="nav-icon"><i class="fas fa-home"></i></span>
+            <span class="nav-label">Inicio</span>
+            <button class="nav-expand" data-target="home" tabindex="-1"><i class="fas fa-chevron-down"></i></button>
+          </div>
+          <div class="nav-dropdown" id="drop-home">
+            <div class="drop-desc">Panel principal con estadísticas y acceso rápido.</div>
+            <span class="drop-link" data-view="home">Ir a Inicio →</span>
+          </div>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-header" data-view="blocks">
+            <span class="nav-icon"><i class="fas fa-puzzle-piece"></i></span>
+            <span class="nav-label">Bloques</span>
+            <button class="nav-expand" data-target="blocks" tabindex="-1"><i class="fas fa-chevron-down"></i></button>
+          </div>
+          <div class="nav-dropdown" id="drop-blocks">
+            <div class="drop-desc">Programa visualmente arrastrando bloques. Combina eventos, acciones y condiciones.</div>
+            <span class="drop-link" data-view="blocks">Ir a Bloques →</span>
+          </div>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-header" data-view="embed">
+            <span class="nav-icon"><i class="fas fa-image"></i></span>
+            <span class="nav-label">Embed</span>
+            <button class="nav-expand" data-target="embed" tabindex="-1"><i class="fas fa-chevron-down"></i></button>
+          </div>
+          <div class="nav-dropdown" id="drop-embed">
+            <div class="drop-desc">Diseña mensajes con formato visual: título, descripción, color, campos y más.</div>
+            <span class="drop-link" data-view="embed">Ir a Embed →</span>
+          </div>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-header" data-view="forms">
+            <span class="nav-icon"><i class="fas fa-list"></i></span>
+            <span class="nav-label">Formularios</span>
+            <button class="nav-expand" data-target="forms" tabindex="-1"><i class="fas fa-chevron-down"></i></button>
+          </div>
+          <div class="nav-dropdown" id="drop-forms">
+            <div class="drop-desc">Crea formularios modales con campos personalizados: texto, párrafos y desplegables.</div>
+            <span class="drop-link" data-view="forms">Ir a Formularios →</span>
+          </div>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-header" data-view="test">
+            <span class="nav-icon"><i class="fas fa-play"></i></span>
+            <span class="nav-label">Probar</span>
+            <button class="nav-expand" data-target="test" tabindex="-1"><i class="fas fa-chevron-down"></i></button>
+          </div>
+          <div class="nav-dropdown" id="drop-test">
+            <div class="drop-desc">Simula tu bot en un entorno tipo Discord. Prueba comandos, embeds y formularios.</div>
+            <span class="drop-link" data-view="test">Ir a Probar →</span>
+          </div>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-header" data-view="projects">
+            <span class="nav-icon"><i class="fas fa-folder"></i></span>
+            <span class="nav-label">Proyectos</span>
+            <button class="nav-expand" data-target="projects" tabindex="-1"><i class="fas fa-chevron-down"></i></button>
+          </div>
+          <div class="nav-dropdown" id="drop-projects">
+            <div class="drop-desc">Guarda y gestiona tus proyectos. Todo se almacena en tu navegador.</div>
+            <span class="drop-link" data-view="projects">Ir a Proyectos →</span>
+          </div>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-header" data-view="export">
+            <span class="nav-icon"><i class="fas fa-code"></i></span>
+            <span class="nav-label">Exportar</span>
+            <button class="nav-expand" data-target="export" tabindex="-1"><i class="fas fa-chevron-down"></i></button>
+          </div>
+          <div class="nav-dropdown" id="drop-export">
+            <div class="drop-desc">Código JavaScript generado automáticamente desde tus bloques. discord.js v14.</div>
+            <span class="drop-link" data-view="export">Ir a Exportar →</span>
+          </div>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-header" data-view="settings">
+            <span class="nav-icon"><i class="fas fa-cog"></i></span>
+            <span class="nav-label">Configuración</span>
+            <button class="nav-expand" data-target="settings" tabindex="-1"><i class="fas fa-chevron-down"></i></button>
+          </div>
+          <div class="nav-dropdown" id="drop-settings">
+            <div class="drop-desc">Personaliza tu experiencia, gestiona tu cuenta y plan.</div>
+            <span class="drop-link" data-view="settings">Ir a Configuración →</span>
+          </div>
+        </div>
+      </nav>
+      <div class="sidebar-footer">
+        <button class="btn-save" id="saveBtn">
+          <i class="fas fa-floppy-disk"></i>
+          <span>Guardar</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- ─── Main Content ─── -->
+    <main class="main-content">
+      <!-- Home -->
+      <section class="view active" id="view-home">
+        <div class="home-hero">
+          <h1>Construye bots de Discord<br>sin escribir código</h1>
+          <p>Programación visual con bloques. Diseña comandos, embeds, formularios y más. Exporta a discord.js v14.</p>
+          <div class="home-hero-actions">
+            <button class="btn-primary" id="homeStartBtn"><i class="fas fa-puzzle-piece"></i> Empezar a programar</button>
+            <button class="btn-secondary" id="homeEmbedBtn"><i class="fas fa-image"></i> Diseñar Embed</button>
+            <button class="btn-secondary" id="homeFormBtn"><i class="fas fa-list"></i> Crear Formulario</button>
+          </div>
+        </div>
+        <div class="home-stats" id="homeStats">
+          <div class="stat-card">
+            <div class="stat-number" id="statBlocks">0</div>
+            <div class="stat-label">Bloques usados</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="statProjects">0</div>
+            <div class="stat-label">Proyectos guardados</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="statCategories">10</div>
+            <div class="stat-label">Categorías de bloques</div>
+          </div>
+        </div>
+        <div class="home-config">
+          <div class="config-card">
+            <h3><i class="fas fa-sliders" style="color:var(--accent);margin-right:6px;"></i> Configuración del Bot</h3>
+            <div class="config-grid">
+              <div class="config-item">
+                <label>Nombre del bot</label>
+                <input type="text" id="configBotName" placeholder="Mi Bot" value="Mi Bot">
+              </div>
+              <div class="config-item">
+                <label>Prefijo de comandos</label>
+                <input type="text" id="configPrefix" value="/" maxlength="3">
+              </div>
+              <div class="config-item">
+                <label>Lenguaje de exportación</label>
+                <select id="configLang">
+                  <option value="discordjs">discord.js v14</option>
+                  <option value="discordpy" disabled>discord.py (próximamente)</option>
+                </select>
+              </div>
+              <div class="config-item">
+                <label>Token del bot (opcional)</label>
+                <input type="password" id="configToken" placeholder="MTE4...">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tips-grid">
+          <div class="tip-card">
+            <div class="tip-icon"><i class="fas fa-puzzle-piece" style="color:var(--accent);"></i></div>
+            <h4>Bloques</h4>
+            <p>Arrastra bloques del menú lateral para crear la lógica de tu bot visualmente.</p>
+          </div>
+          <div class="tip-card">
+            <div class="tip-icon"><i class="fas fa-image" style="color:var(--accent-2);"></i></div>
+            <h4>Embeds</h4>
+            <p>Diseña mensajes con formato visual usando el constructor de embeds integrado.</p>
+          </div>
+          <div class="tip-card">
+            <div class="tip-icon"><i class="fas fa-list" style="color:#ffb347;"></i></div>
+            <h4>Formularios</h4>
+            <p>Crea formularios modales con campos personalizados para tu bot.</p>
+          </div>
+          <div class="tip-card">
+            <div class="tip-icon"><i class="fas fa-rocket" style="color:#2ecc71;"></i></div>
+            <h4>Exportar</h4>
+            <p>Tu código se genera en tiempo real. Cópialo y ejecuta tu bot al instante.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Blocks -->
+      <section class="view" id="view-blocks">
+        <div class="toolbar">
+          <h1><i class="fas fa-puzzle-piece" style="color:var(--accent);margin-right:8px;"></i> Bloques</h1>
+          <div class="toolbar-actions">
+            <button class="btn-icon" id="undoBtn" title="Deshacer"><i class="fas fa-undo"></i></button>
+            <button class="btn-icon" id="redoBtn" title="Rehacer"><i class="fas fa-redo"></i></button>
+            <button class="btn-icon" id="zoomInBtn" title="Acercar"><i class="fas fa-plus"></i></button>
+            <button class="btn-icon" id="zoomOutBtn" title="Alejar"><i class="fas fa-minus"></i></button>
+            <button class="btn-icon" id="deleteBlocksBtn" title="Limpiar todo"><i class="fas fa-trash-can"></i></button>
+          </div>
+        </div>
+        <div id="blocklyDiv"></div>
+      </section>
+
+      <!-- Embed Builder -->
+      <section class="view" id="view-embed">
+        <div class="toolbar">
+          <h1><i class="fas fa-image" style="color:var(--accent-2);margin-right:8px;"></i> Constructor de Embeds</h1>
+          <button class="btn-primary" id="addEmbedBtn"><i class="fas fa-plus"></i> Nuevo Embed</button>
+        </div>
+        <div class="embed-builder-grid">
+          <div class="embed-form" id="embedForm">
+            <div class="form-group">
+              <label>Título</label>
+              <input type="text" id="embedTitle" placeholder="Título del embed" maxlength="256">
+            </div>
+            <div class="form-group">
+              <label>Descripción</label>
+              <textarea id="embedDescription" placeholder="Descripción del embed..." rows="3" maxlength="4096"></textarea>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Color</label>
+                <input type="color" id="embedColor" value="#5865F2">
+              </div>
+              <div class="form-group">
+                <label>URL del autor</label>
+                <input type="url" id="embedAuthorUrl" placeholder="https://...">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Nombre del autor</label>
+              <input type="text" id="embedAuthorName" placeholder="Nombre del autor">
+            </div>
+            <div class="form-group">
+              <label>URL del icono del autor</label>
+              <input type="url" id="embedAuthorIcon" placeholder="https://...">
+            </div>
+            <div class="embed-fields-section">
+              <h4>Campos adicionales</h4>
+              <div id="embedFields">
+                <div class="embed-field-item">
+                  <input type="text" placeholder="Nombre" class="field-name">
+                  <input type="text" placeholder="Valor" class="field-value">
+                  <button class="btn-icon remove-field" title="Eliminar campo"><i class="fas fa-times"></i></button>
+                </div>
+              </div>
+              <button class="btn-secondary" id="addFieldBtn"><i class="fas fa-plus"></i> Añadir campo</button>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>URL de imagen</label>
+                <input type="url" id="embedImage" placeholder="https://...">
+              </div>
+              <div class="form-group">
+                <label>URL de thumbnail</label>
+                <input type="url" id="embedThumbnail" placeholder="https://...">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Footer</label>
+                <input type="text" id="embedFooter" placeholder="Texto del footer">
+              </div>
+              <div class="form-group">
+                <label>URL del icono del footer</label>
+                <input type="url" id="embedFooterIcon" placeholder="https://...">
+              </div>
+            </div>
+            <button class="btn-primary" id="applyEmbedBtn"><i class="fas fa-check"></i> Aplicar a Bloques</button>
+          </div>
+          <div class="embed-preview-wrapper">
+            <div class="embed-preview">
+              <div class="discord-message">
+                <div class="discord-avatar"></div>
+                <div class="discord-message-content">
+                  <span class="discord-username">Bot</span>
+                  <span class="discord-timestamp">Today at 12:00</span>
+                  <div class="discord-text">Mensaje con embed</div>
+                  <div class="discord-embed" id="previewEmbed">
+                    <div style="display:flex;gap:12px;">
+                      <div class="discord-embed-thumbnail" id="previewThumbnail"></div>
+                      <div style="flex:1;min-width:0;">
+                        <div class="discord-embed-author" id="previewAuthor"></div>
+                        <div class="discord-embed-title" id="previewTitle">Título del embed</div>
+                        <div class="discord-embed-desc" id="previewDescription">Descripción aquí...</div>
+                      </div>
+                    </div>
+                    <div class="discord-embed-fields" id="previewFields"></div>
+                    <div class="discord-embed-image" id="previewImage"></div>
+                    <div class="discord-embed-footer" id="previewFooter"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Forms Builder -->
+      <section class="view" id="view-forms">
+        <div class="toolbar">
+          <h1><i class="fas fa-list" style="color:#ffb347;margin-right:8px;"></i> Formularios Modales</h1>
+          <button class="btn-primary" id="addFormFieldBtn"><i class="fas fa-plus"></i> Añadir campo</button>
+        </div>
+        <div class="form-builder-grid">
+          <div class="form-editor">
+            <div class="form-group">
+              <label>Título del formulario</label>
+              <input type="text" id="formTitle" placeholder="Mi Formulario" maxlength="45">
+            </div>
+            <div class="form-group">
+              <label>ID personalizado</label>
+              <input type="text" id="formCustomId" value="mi_formulario" placeholder="mi_formulario">
+            </div>
+            <div id="formFieldsContainer"></div>
+            <button class="btn-primary" id="applyFormBtn"><i class="fas fa-check"></i> Aplicar a Bloques</button>
+            <div class="form-templates">
+              <h4><i class="fas fa-bookmark" style="color:var(--accent-2);margin-right:4px;"></i> Plantillas guardadas</h4>
+              <div style="display:flex;gap:6px;margin-bottom:8px;">
+                <input type="text" id="formTemplateName" placeholder="Nombre de la plantilla" style="flex:1;padding:8px 10px;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary);font-family:var(--font);font-size:12px;outline:none;">
+                <button class="btn-secondary" id="saveFormTemplateBtn" style="font-size:12px;padding:8px 12px;"><i class="fas fa-floppy-disk"></i> Guardar</button>
+              </div>
+              <div id="savedTemplatesList"></div>
+            </div>
+          </div>
+          <div>
+            <div class="form-preview">
+              <h3><i class="fas fa-eye" style="color:var(--text-muted);margin-right:6px;"></i> Vista previa</h3>
+              <div id="previewFormTitle" style="font-size:15px;font-weight:600;margin-bottom:16px;">Mi Formulario</div>
+              <div id="previewFormFields">
+                <div style="color:var(--text-muted);font-size:12px;">Añade campos para ver la vista previa</div>
+              </div>
+              <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px;padding-top:12px;border-top:1px solid var(--border);">
+                <span style="padding:8px 16px;background:var(--bg-tertiary);border-radius:var(--radius-sm);font-size:12px;color:var(--text-secondary);">Cancelar</span>
+                <span style="padding:8px 16px;background:var(--accent);border-radius:var(--radius-sm);font-size:12px;color:#fff;font-weight:600;">Enviar</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Test / Simulator -->
+      <section class="view" id="view-test">
+        <div class="toolbar">
+          <h1><i class="fas fa-play" style="color:#2ecc71;margin-right:8px;"></i> Simulador</h1>
+          <div class="toolbar-actions">
+            <button class="btn-secondary" id="simClearBtn"><i class="fas fa-eraser"></i> Limpiar</button>
+            <button class="btn-secondary" id="simResetBtn"><i class="fas fa-rotate"></i> Reiniciar</button>
+          </div>
+        </div>
+        <div class="sim-layout">
+          <div class="sim-channels" id="simSidebar">
+            <h3>Canales</h3>
+            <div id="simChannelList"></div>
+          </div>
+          <div class="sim-main">
+            <div class="sim-messages" id="simMessages">
+              <div style="text-align:center;padding:60px 20px;color:var(--text-muted);">
+                <i class="fas fa-robot" style="font-size:48px;display:block;margin-bottom:16px;opacity:0.3;"></i>
+                <h3 style="color:var(--text-secondary);font-weight:600;">Simulador de Bot</h3>
+                <p style="font-size:13px;margin-top:6px;">Escribe comandos abajo para probar tu bot.</p>
+              </div>
+            </div>
+            <div class="sim-chips" id="simChips"></div>
+            <div class="sim-input-bar">
+              <span class="sim-prefix">/</span>
+              <input type="text" id="simInput" placeholder="Escribe un comando..." autocomplete="off" spellcheck="false">
+              <button class="sim-send-btn" id="simSendBtn"><i class="fas fa-paper-plane"></i></button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Projects -->
+      <section class="view" id="view-projects">
+        <div class="toolbar">
+          <h1><i class="fas fa-folder" style="color:#ffb347;margin-right:8px;"></i> Mis Proyectos</h1>
+          <button class="btn-primary" id="newProjectBtn"><i class="fas fa-plus"></i> Nuevo proyecto</button>
+        </div>
+        <div class="projects-grid" id="projectsGrid">
+          <div class="project-card empty">
+            <div class="empty-icon"><i class="fas fa-folder-open"></i></div>
+            <h3>No hay proyectos aún</h3>
+            <p>Crea tu primer proyecto con bloques</p>
+            <button class="btn-primary" id="emptyNewProjectBtn"><i class="fas fa-plus"></i> Crear proyecto</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Export -->
+      <section class="view" id="view-export">
+        <div class="toolbar">
+          <h1><i class="fas fa-code" style="color:var(--accent-2);margin-right:8px;"></i> Exportar Código</h1>
+          <button class="btn-primary" id="copyCodeBtn"><i class="fas fa-copy"></i> Copiar código</button>
+        </div>
+        <div class="export-toolbar">
+          <span>El código se genera automáticamente desde tus bloques.</span>
+        </div>
+        <pre id="generatedCode"><code>// El código aparecerá aquí cuando programes con bloques</code></pre>
+      </section>
+
+      <!-- Settings -->
+      <section class="view" id="view-settings">
+        <div class="toolbar">
+          <h1><i class="fas fa-cog" style="color:var(--text-secondary);margin-right:8px;"></i> Configuración</h1>
+        </div>
+        <div class="settings-content">
+          <div class="settings-section">
+            <h3><i class="fas fa-user"></i> Cuenta</h3>
+            <div class="settings-row">
+              <div>
+                <div class="settings-label">Usuario</div>
+                <div class="settings-desc" id="settingsUsername">No has iniciado sesión</div>
+              </div>
+              <button class="btn-secondary" id="settingsLoginBtn"><i class="fas fa-sign-in-alt"></i> Iniciar sesión</button>
+            </div>
+            <div class="settings-row">
+              <div>
+                <div class="settings-label">Plan actual</div>
+                <div class="settings-desc" id="settingsPlan">Gratuito — 5 proyectos, 100 bloques por proyecto</div>
+              </div>
+              <span class="settings-badge free" id="settingsBadge">Gratuito</span>
+            </div>
+          </div>
+          <div class="settings-section">
+            <h3><i class="fas fa-palette"></i> Apariencia</h3>
+            <div class="settings-row">
+              <div>
+                <div class="settings-label">Tema oscuro</div>
+                <div class="settings-desc">Modo oscuro nativo (siempre activo)</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" checked disabled>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="settings-row">
+              <div>
+                <div class="settings-label">Animaciones</div>
+                <div class="settings-desc">Transiciones y efectos visuales</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="toggleAnimations" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+          <div class="settings-section">
+            <h3><i class="fas fa-crown" style="color:#ffb347;"></i> Planes</h3>
+            <div class="settings-row">
+              <div>
+                <div class="settings-label">Gratuito</div>
+                <div class="settings-desc">5 proyectos, 100 bloques/proyecto, bloques esenciales + texto + lógica + variables</div>
+              </div>
+              <span class="settings-badge free">Actual</span>
+            </div>
+            <div class="settings-row">
+              <div>
+                <div class="settings-label">Pro</div>
+                <div class="settings-desc">Proyectos ilimitados, todos los bloques, exportación avanzada</div>
+              </div>
+              <span class="settings-badge pro">Próximamente</span>
+            </div>
+            <div class="settings-row" style="border-bottom:none;">
+              <div>
+                <div class="settings-label">Premium</div>
+                <div class="settings-desc">Todo lo de Pro + bloques exclusivos, plantillas, soporte prioritario</div>
+              </div>
+              <span class="settings-badge premium">Próximamente</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="js/blocks/discord_blocks.js"></script>
+  <script src="js/blocks/modal_blocks.js"></script>
+  <script src="js/blocks/image_blocks.js"></script>
+  <script src="js/blocks/util_blocks.js"></script>
+  <script src="js/blocks/complex_blocks.js"></script>
+  <script src="js/blocks/generators.js"></script>
+  <script src="js/embed-builder.js"></script>
+  <script src="js/form-builder.js"></script>
+  <script src="js/home.js"></script>
+  <script src="js/simulator.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
