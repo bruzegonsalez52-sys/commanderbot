@@ -2,13 +2,18 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "commanderbot",
   "compatibility_date": "2026-06-04",
+  "main": "worker.js",
+  "assets": {
+    "directory": ".",
+    "binding": "ASSETS"
+  },
   "observability": {
     "enabled": true
   },
-  "assets": {
-    "directory": "."
-  },
   "compatibility_flags": [
     "nodejs_compat"
-  ]
+  ],
+  "vars": {
+    "SUPABASE_SERVICE_ROLE_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ubndvemNtbXVkc2RjeXBsZXRsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MDUyNDQ1NSwiZXhwIjoyMDk2MTAwNDU1fQ.G-f40K-QZpHplmSQMWsrMmsLy18Q2Jj2Txx9JKPR0f4"
+  }
 }

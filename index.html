@@ -145,6 +145,17 @@
             <span class="drop-link" data-view="export" data-i18n="sidebar.exportGo">Ir a Exportar →</span>
           </div>
         </div>
+        <div class="nav-section" id="navAdmin" style="display:none;">
+          <div class="nav-section-header" data-view="admin">
+            <span class="nav-icon"><i class="fas fa-shield-halved"></i></span>
+            <span class="nav-label" data-i18n="sidebar.admin">Admin</span>
+            <button class="nav-expand" data-target="admin" tabindex="-1"><i class="fas fa-chevron-down"></i></button>
+          </div>
+          <div class="nav-dropdown" id="drop-admin">
+            <div class="drop-desc" data-i18n="sidebar.adminDesc">Gestiona usuarios y planes. Panel de administración.</div>
+            <span class="drop-link" data-view="admin" data-i18n="sidebar.adminGo">Ir a Admin →</span>
+          </div>
+        </div>
         <div class="nav-section">
           <div class="nav-section-header" data-view="settings">
             <span class="nav-icon"><i class="fas fa-cog"></i></span>
@@ -458,6 +469,79 @@
         </div>
         <pre id="generatedCode"><code data-i18n="export.empty">// El código aparecerá aquí cuando programes con bloques</code></pre>
       </section>
+
+      <!-- Admin Panel -->
+      <section class="view" id="view-admin">
+        <div class="toolbar">
+          <h1><i class="fas fa-shield-halved" style="color:var(--accent);margin-right:8px;"></i> <span data-i18n="admin.title">Panel de Administración</span></h1>
+        </div>
+        <div class="admin-content">
+          <div class="admin-toolbar">
+            <div class="admin-search">
+              <i class="fas fa-search"></i>
+              <input type="text" id="adminSearch" data-i18n-placeholder="admin.searchPlaceholder" placeholder="Buscar usuarios por email o nombre...">
+            </div>
+            <span class="admin-count" id="adminCount">0 <span data-i18n="admin.users">usuarios</span></span>
+          </div>
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th><span data-i18n="admin.email">Email</span></th>
+                  <th><span data-i18n="admin.username">Usuario</span></th>
+                  <th><span data-i18n="admin.plan">Plan</span></th>
+                  <th><span data-i18n="admin.admin">Admin</span></th>
+                  <th><span data-i18n="admin.created">Creado</span></th>
+                  <th><span data-i18n="admin.actions">Acciones</span></th>
+                </tr>
+              </thead>
+              <tbody id="adminTableBody"></tbody>
+            </table>
+          </div>
+          <div class="admin-loading" id="adminLoading"><i class="fas fa-spinner fa-spin"></i> <span data-i18n="admin.loading">Cargando usuarios...</span></div>
+        </div>
+      </section>
+
+      <!-- Admin Edit Modal -->
+      <div class="modal-overlay" id="adminEditModal" style="display:none;">
+        <div class="modal" style="max-width:420px;">
+          <div class="modal-header">
+            <h3 data-i18n="admin.editUser">Editar Usuario</h3>
+            <button class="modal-close" id="adminEditClose">&times;</button>
+          </div>
+          <div class="modal-body">
+            <div class="form-group">
+              <label data-i18n="admin.email">Email</label>
+              <input type="text" id="adminEditEmail" disabled style="opacity:0.6;">
+            </div>
+            <div class="form-group">
+              <label data-i18n="admin.username">Usuario</label>
+              <input type="text" id="adminEditUsername">
+            </div>
+            <div class="form-group">
+              <label data-i18n="admin.plan">Plan</label>
+              <select id="adminEditPlan" style="padding:8px 10px;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary);font-family:var(--font);font-size:13px;width:100%;outline:none;">
+                <option value="free">Free</option>
+                <option value="pro">Pro</option>
+                <option value="premium">Premium</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="toggle-row">
+                <span data-i18n="admin.admin">Admin</span>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="adminEditAdminToggle">
+                  <span class="toggle-slider"></span>
+                </label>
+              </label>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn-secondary" id="adminEditCancel" data-i18n="admin.cancel">Cancelar</button>
+            <button class="btn-primary" id="adminEditSave" data-i18n="admin.save">Guardar</button>
+          </div>
+        </div>
+      </div>
 
       <!-- Settings -->
       <section class="view" id="view-settings">

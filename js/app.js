@@ -49,6 +49,7 @@ class DiscordBotBuilder {
     this.updateExportDisplay();
     this.updateAuthUI();
     this.refreshUser();
+    this.initAdmin();
     // Show auth after a brief delay if not logged in
     setTimeout(() => {
       if (!this.currentUser) this.showAuth();
@@ -93,7 +94,19 @@ class DiscordBotBuilder {
       settingsUsername: document.getElementById('settingsUsername'),
       settingsPlan: document.getElementById('settingsPlan'),
       settingsBadge: document.getElementById('settingsBadge'),
-      settingsLoginBtn: document.getElementById('settingsLoginBtn')
+      settingsLoginBtn: document.getElementById('settingsLoginBtn'),
+      adminTableBody: document.getElementById('adminTableBody'),
+      adminLoading: document.getElementById('adminLoading'),
+      adminCount: document.getElementById('adminCount'),
+      adminSearch: document.getElementById('adminSearch'),
+      adminEditModal: document.getElementById('adminEditModal'),
+      adminEditEmail: document.getElementById('adminEditEmail'),
+      adminEditUsername: document.getElementById('adminEditUsername'),
+      adminEditPlan: document.getElementById('adminEditPlan'),
+      adminEditAdminToggle: document.getElementById('adminEditAdminToggle'),
+      adminEditClose: document.getElementById('adminEditClose'),
+      adminEditCancel: document.getElementById('adminEditCancel'),
+      adminEditSave: document.getElementById('adminEditSave')
     };
   }
 
@@ -1163,6 +1176,8 @@ await interaction.showModal(modal);`;
         this.dom.userPlan.textContent = 'Admin';
         this.dom.userPlan.className = 'user-plan premium';
       }
+      const adminNav = document.getElementById('navAdmin');
+      if (adminNav) adminNav.style.display = this.isAdmin() ? 'block' : 'none';
       this.dom.settingsLoginBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> ' + t('settings.logout');
     } else {
       this.dom.sidebarUser.style.display = 'none';
@@ -1171,6 +1186,8 @@ await interaction.showModal(modal);`;
       this.dom.settingsBadge.textContent = t('free');
       this.dom.settingsBadge.className = 'settings-badge free';
       this.dom.settingsLoginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> ' + t('settings.login');
+      const adminNav = document.getElementById('navAdmin');
+      if (adminNav) adminNav.style.display = 'none';
     }
     // Update data-i18n elements that were translated via attributes
     translatePage();
@@ -1863,6 +1880,152 @@ await interaction.showModal(modal);`;
     const div = document.createElement('div');
     div.textContent = str;
     return div.innerHTML;
+  }
+
+  // ─── Admin Panel ───
+  initAdmin() {
+    this.adminEditingId = null;
+    this.adminUsers = [];
+
+    this.dom.adminSearch.addEventListener('input', () => this.filterAdminUsers());
+
+    this.dom.adminEditClose.addEventListener('click', () => this.closeAdminEdit());
+    this.dom.adminEditCancel.addEventListener('click', () => this.closeAdminEdit());
+    this.dom.adminEditModal.addEventListener('click', (e) => {
+      if (e.target === this.dom.adminEditModal) this.closeAdminEdit();
+    });
+    this.dom.adminEditSave.addEventListener('click', () => this.saveAdminEdit());
+
+    this.loadAdminUsers();
+  }
+
+  async loadAdminUsers() {
+    this.dom.adminLoading.style.display = 'block';
+    this.dom.adminTableBody.innerHTML = '';
+    try {
+      const { data: { session } } = await sbClient.auth.getSession();
+      if (!session) throw new Error('No session');
+      const resp = await fetch('/api/admin/users', {
+        headers: { Authorization: `Bearer ${session.access_token}` }
+      });
+      if (!resp.ok) {
+        if (resp.status === 403) {
+          this.dom.adminLoading.innerHTML = '<span style="color:var(--danger);">⛔ ' + t('admin.loadError') + '</span>';
+          return;
+        }
+        throw new Error('HTTP ' + resp.status);
+      }
+      const data = await resp.json();
+      this.adminUsers = data.users || [];
+      this.renderAdminTable(this.adminUsers);
+      this.dom.adminLoading.style.display = 'none';
+      this.dom.adminCount.textContent = this.adminUsers.length + ' ' + t('admin.users');
+    } catch (err) {
+      console.error('Admin load error:', err);
+      this.dom.adminLoading.innerHTML = '<span style="color:var(--danger);">⚠️ ' + t('admin.loadError') + '</span>';
+    }
+  }
+
+  renderAdminTable(users) {
+    const tbody = this.dom.adminTableBody;
+    if (!users.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text-muted);"><i class="fas fa-inbox"></i> ' + t('admin.noUsers', 'No hay usuarios') + '</td></tr>';
+      return;
+    }
+    tbody.innerHTML = users.map(u => {
+      const meta = u.user_metadata || {};
+      const plan = meta.plan || 'free';
+      const isAdmin = meta.admin === true;
+      const created = u.created_at ? new Date(u.created_at).toLocaleDateString() : '-';
+      const email = this.escapeHtml(u.email || '');
+      const username = this.escapeHtml(meta.username || email.split('@')[0] || '-');
+      return `<tr>
+        <td>${email}</td>
+        <td><strong>${username}</strong></td>
+        <td><span class="plan-badge ${plan}">${plan}</span></td>
+        <td>${isAdmin ? '<span class="admin-badge"><i class="fas fa-check-circle"></i> ' + t('admin.yes') + '</span>' : t('admin.no')}</td>
+        <td>${created}</td>
+        <td><button class="btn-icon" data-admin-edit="${u.id}"><i class="fas fa-edit"></i></button></td>
+      </tr>`;
+    }).join('');
+
+    tbody.querySelectorAll('[data-admin-edit]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.adminEdit;
+        const user = this.adminUsers.find(u => u.id === id);
+        if (user) this.openAdminEdit(user);
+      });
+    });
+  }
+
+  filterAdminUsers() {
+    const q = this.dom.adminSearch.value.toLowerCase().trim();
+    if (!q) {
+      this.renderAdminTable(this.adminUsers);
+      this.dom.adminCount.textContent = this.adminUsers.length + ' ' + t('admin.users');
+      return;
+    }
+    const filtered = this.adminUsers.filter(u => {
+      const meta = u.user_metadata || {};
+      const email = (u.email || '').toLowerCase();
+      const username = (meta.username || '').toLowerCase();
+      return email.includes(q) || username.includes(q);
+    });
+    this.renderAdminTable(filtered);
+    this.dom.adminCount.textContent = filtered.length + ' ' + t('admin.users');
+  }
+
+  openAdminEdit(user) {
+    this.adminEditingId = user.id;
+    const meta = user.user_metadata || {};
+    this.dom.adminEditEmail.value = user.email || '';
+    this.dom.adminEditUsername.value = meta.username || '';
+    this.dom.adminEditPlan.value = meta.plan || 'free';
+    this.dom.adminEditAdminToggle.checked = meta.admin === true;
+    this.dom.adminEditModal.style.display = 'flex';
+  }
+
+  closeAdminEdit() {
+    this.dom.adminEditModal.style.display = 'none';
+    this.adminEditingId = null;
+  }
+
+  async saveAdminEdit() {
+    if (!this.adminEditingId) return;
+    const username = this.dom.adminEditUsername.value.trim() || 'Usuario';
+    const plan = this.dom.adminEditPlan.value;
+    const admin = this.dom.adminEditAdminToggle.checked;
+
+    const payload = {
+      user_metadata: {
+        username,
+        plan,
+        admin: admin ? true : false
+      }
+    };
+
+    try {
+      const { data: { session } } = await sbClient.auth.getSession();
+      if (!session) throw new Error('No session');
+      const resp = await fetch('/api/admin/users/' + this.adminEditingId, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+      if (!resp.ok) {
+        const err = await resp.json();
+        throw new Error(err.error || 'HTTP ' + resp.status);
+      }
+      this.closeAdminEdit();
+      alert(t('admin.saved'));
+      this.loadAdminUsers();
+    } catch (err) {
+      console.error('Admin save error:', err);
+      alert(t('admin.error') + ': ' + err.message);
+    }
   }
 }
 

@@ -187,7 +187,30 @@ const LANG = {
     'copied': 'Copiado',
     // Data templates
     'dataTemplates': 'Plantillas de datos',
-    'formTemplates': 'Plantillas de formularios'
+    'formTemplates': 'Plantillas de formularios',
+    // Admin
+    'sidebar.admin': 'Admin',
+    'sidebar.adminDesc': 'Gestiona usuarios y planes. Panel de administración.',
+    'sidebar.adminGo': 'Ir a Admin →',
+    'admin.title': 'Panel de Administración',
+    'admin.searchPlaceholder': 'Buscar usuarios por email o nombre...',
+    'admin.users': 'usuarios',
+    'admin.email': 'Email',
+    'admin.username': 'Usuario',
+    'admin.plan': 'Plan',
+    'admin.admin': 'Admin',
+    'admin.created': 'Creado',
+    'admin.actions': 'Acciones',
+    'admin.loading': 'Cargando usuarios...',
+    'admin.editUser': 'Editar Usuario',
+    'admin.cancel': 'Cancelar',
+    'admin.save': 'Guardar',
+    'admin.saved': '✅ Usuario actualizado',
+    'admin.error': 'Error al actualizar usuario',
+    'admin.loadError': 'Error al cargar usuarios',
+    'admin.yes': 'Sí',
+    'admin.no': 'No',
+    'admin.noUsers': 'No hay usuarios'
   },
 
   en: {
@@ -375,7 +398,30 @@ const LANG = {
     'no': 'No',
     'copied': 'Copied',
     'dataTemplates': 'Data templates',
-    'formTemplates': 'Form templates'
+    'formTemplates': 'Form templates',
+    // Admin
+    'sidebar.admin': 'Admin',
+    'sidebar.adminDesc': 'Manage users and plans. Admin panel.',
+    'sidebar.adminGo': 'Go to Admin →',
+    'admin.title': 'Admin Panel',
+    'admin.searchPlaceholder': 'Search users by email or name...',
+    'admin.users': 'users',
+    'admin.email': 'Email',
+    'admin.username': 'Username',
+    'admin.plan': 'Plan',
+    'admin.admin': 'Admin',
+    'admin.created': 'Created',
+    'admin.actions': 'Actions',
+    'admin.loading': 'Loading users...',
+    'admin.editUser': 'Edit User',
+    'admin.cancel': 'Cancel',
+    'admin.save': 'Save',
+    'admin.saved': '✅ User updated',
+    'admin.error': 'Error updating user',
+    'admin.loadError': 'Error loading users',
+    'admin.yes': 'Yes',
+    'admin.no': 'No',
+    'admin.noUsers': 'No users'
   }
 };
 
