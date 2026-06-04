@@ -1916,26 +1916,31 @@ await interaction.showModal(modal);`;
     this.dom.adminLoading.style.display = 'block';
     this.dom.adminTableBody.innerHTML = '';
     try {
-      const { data: { session } } = await sbClient.auth.getSession();
-      if (!session) throw new Error('No session');
+      const { data: { session }, error: sessErr } = await sbClient.auth.getSession();
+      if (sessErr) throw new Error('Session error: ' + sessErr.message);
+      if (!session) throw new Error('No hay sesión activa. Inicia sesión.');
+      console.log('[Admin] Session OK, fetching users...');
       const resp = await fetch('/api/admin/users', {
         headers: { Authorization: `Bearer ${session.access_token}` }
       });
       if (!resp.ok) {
+        const errBody = await resp.text();
+        console.error('[Admin] API error:', resp.status, errBody);
         if (resp.status === 403) {
-          this.dom.adminLoading.innerHTML = '<span style="color:var(--danger);">⛔ ' + t('admin.loadError') + '</span>';
+          this.dom.adminLoading.innerHTML = '<span style="color:var(--danger);">⛔ Acceso denegado (no eres admin)</span>';
           return;
         }
-        throw new Error('HTTP ' + resp.status);
+        throw new Error('HTTP ' + resp.status + ': ' + errBody);
       }
       const data = await resp.json();
+      console.log('[Admin] Users loaded:', data.users?.length || 0);
       this.adminUsers = data.users || [];
       this.renderAdminTable(this.adminUsers);
       this.dom.adminLoading.style.display = 'none';
       this.dom.adminCount.textContent = this.adminUsers.length + ' ' + t('admin.users');
     } catch (err) {
-      console.error('Admin load error:', err);
-      this.dom.adminLoading.innerHTML = '<span style="color:var(--danger);">⚠️ ' + t('admin.loadError') + '</span>';
+      console.error('[Admin] Load error:', err);
+      this.dom.adminLoading.innerHTML = '<span style="color:var(--danger);">⚠️ ' + this.escapeHtml(err.message || t('admin.loadError')) + '</span>';
     }
   }
 
