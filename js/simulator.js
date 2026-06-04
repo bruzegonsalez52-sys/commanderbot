@@ -330,7 +330,14 @@ class DiscordSimulator {
 
     this.addMessage('user', text, null, cmdChannel);
 
-    const cmd = text.split(' ')[0];
+    const parts = text.split(' ');
+    let searchCmd = parts.slice(0, 2).join('_');
+    let cmd = parts[0];
+    if (this.commands[searchCmd]) {
+      cmd = searchCmd;
+    } else {
+      cmd = parts[0];
+    }
     if (cmd === 'ayuda') {
       setTimeout(() => this.cmd_ayuda(), 500);
     } else if (this.commands[cmd]) {
@@ -339,7 +346,7 @@ class DiscordSimulator {
       const known = Object.keys(this.commands);
       let hint = '';
       if (known.length > 0) {
-        hint = ' Comandos disponibles: /' + known.join(', /');
+        hint = ' Comandos disponibles: /' + known.join(', /').replace(/_/g, ' ');
       } else {
         hint = ' Crea comandos en la sección Bloques.';
       }
@@ -669,7 +676,8 @@ class DiscordSimulator {
     if (names.length > 0) {
       names.forEach(n => {
         if (n.startsWith('__')) return;
-        html += '<button class="sim-chip" data-cmd="' + n + '">/' + n + '</button>';
+        const display = n.replace(/_/g, ' ');
+        html += '<button class="sim-chip" data-cmd="' + n + '" data-display="' + display + '">/' + display + '</button>';
       });
     } else {
       html = '<span class="sim-chip-label">Tus comandos aparecerán aquí cuando crees bloques.</span>';
@@ -748,7 +756,7 @@ class DiscordSimulator {
   // ─── Ayuda ───
   cmd_ayuda() {
     const names = Object.keys(this.commands);
-    let cmdList = names.map(n => '• /' + n).join('\n');
+    let cmdList = names.map(n => '• /' + n.replace(/_/g, ' ')).join('\n');
     if (!cmdList) cmdList = '(Crea comandos en la sección Bloques)';
     this.addMessage('bot', 'Comandos de tu bot (' + names.length + ' disponible' + (names.length === 1 ? '' : 's') + '):\n' + cmdList + '\n\n• /ayuda - Esta ayuda');
   }

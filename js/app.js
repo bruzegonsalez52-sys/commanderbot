@@ -1012,6 +1012,19 @@ await interaction.showModal(modal);`;
         this.traverseStatements(block.getInputTargetBlock('DO'), actions);
         commands[cmdName] = actions;
       }
+      if (block.type === 'event_command_with_subcommands') {
+        const cmdName = block.getFieldValue('COMMAND');
+        let subBlock = block.getInputTargetBlock('SUBCOMMANDS');
+        while (subBlock) {
+          if (subBlock.type === 'subcommand') {
+            const subName = subBlock.getFieldValue('NAME') || 'sub';
+            const actions = [];
+            this.traverseStatements(subBlock.getInputTargetBlock('DO'), actions);
+            commands[cmdName + '_' + subName] = actions;
+          }
+          subBlock = subBlock.getNextBlock();
+        }
+      }
       if (block.type === 'on_select_menu') {
         const menuId = block.getFieldValue('CUSTOM_ID');
         const actions = [];

@@ -722,6 +722,26 @@ gen['get_option'] = function(block) {
   return ['interaction.options.get("' + name + '")?.value || ""', gen.ORDER_MEMBER];
 };
 
+// ─── Subcomandos ───
+gen['event_command_with_subcommands'] = function(block) {
+  const cmd = block.getFieldValue('COMMAND') || 'comando';
+  let code = '';
+  let subBlock = block.getInputTargetBlock('SUBCOMMANDS');
+  while (subBlock) {
+    if (subBlock.type === 'subcommand') {
+      const name = subBlock.getFieldValue('NAME') || 'sub';
+      const body = gen.statementToCode(subBlock, 'DO');
+      code += 'event_command_' + cmd + '_' + name + ':\n' + body;
+    }
+    subBlock = subBlock.getNextBlock();
+  }
+  return code;
+};
+
+gen['subcommand'] = function(block) {
+  return '';
+};
+
 // ─── Bucles Avanzados ───
 gen['for_i'] = function(block) {
   const varName = block.getFieldValue('VAR') || 'i';

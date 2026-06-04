@@ -230,6 +230,35 @@ Blockly.defineBlocksWithJsonArray([
     "colour": 120,
     "tooltip": "Obtiene el valor de un parámetro del comando. Ej: opción 'usuario' → @Juan. Úsalo dentro de un comando"
   },
+  // ─── Subcomandos ───
+  {
+    "type": "event_command_with_subcommands",
+    "message0": "Comando con subcomandos /%1 %2 %3",
+    "args0": [
+      {"type": "field_input", "name": "COMMAND", "text": "plantilla"},
+      {"type": "input_dummy"},
+      {"type": "input_statement", "name": "SUBCOMMANDS"}
+    ],
+    "colour": 120,
+    "tooltip": "Define un comando principal con subcomandos. Ej: /plantilla crear, /plantilla editar. Conecta bloques Subcomando dentro",
+    "previousStatement": null,
+    "nextStatement": null
+  },
+  {
+    "type": "subcommand",
+    "message0": "Subcomando %1 %2 descripción %3 %4 %5",
+    "args0": [
+      {"type": "field_input", "name": "NAME", "text": "crear"},
+      {"type": "input_dummy"},
+      {"type": "input_value", "name": "DESC", "check": "String"},
+      {"type": "input_dummy"},
+      {"type": "input_statement", "name": "DO"}
+    ],
+    "colour": 195,
+    "tooltip": "Define un subcomando. Conecta varios para tener múltiples como /plantilla crear, /plantilla editar",
+    "previousStatement": null,
+    "nextStatement": null
+  },
   // ─── Buques Avanzados ───
   {
     "type": "for_i",
@@ -458,6 +487,14 @@ const COMPLEX_TOOLBOX_XML = `
     </block>
     <block type="get_option">
       <field name="NAME">usuario</field>
+    </block>
+  </category>
+  <category name="Subcomandos" colour="195">
+    <block type="event_command_with_subcommands">
+      <field name="COMMAND">plantilla</field>
+    </block>
+    <block type="subcommand">
+      <field name="NAME">crear</field>
     </block>
   </category>
   <category name="Avanzado" colour="0">
