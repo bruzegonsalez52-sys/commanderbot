@@ -189,6 +189,35 @@ Blockly.defineBlocksWithJsonArray([
     "colour": 290,
     "tooltip": "Obtiene el texto visible que el usuario seleccionó en un menú. Úsalo dentro de 'Cuando seleccionen...'"
   },
+  // ─── Menús Dinámicos ───
+  {
+    "type": "send_select_menu_dynamic",
+    "message0": "Enviar menú dinámico %1 texto %2 %3 opciones %4 %5 canal %6",
+    "args0": [
+      {"type": "input_dummy"},
+      {"type": "input_value", "name": "TEXT", "check": "String"},
+      {"type": "input_dummy"},
+      {"type": "input_value", "name": "OPTIONS", "check": "Array"},
+      {"type": "input_dummy"},
+      {"type": "field_dropdown", "name": "CHANNEL", "options": [["canal actual", "current"], ["general", "general"]]}
+    ],
+    "colour": 290,
+    "tooltip": "Envía un menú con opciones desde variables o base de datos. Las opciones deben ser un array de objetos {label, value, description}",
+    "previousStatement": null,
+    "nextStatement": null
+  },
+  {
+    "type": "build_option",
+    "message0": "Opción label %1 value %2 desc %3",
+    "args0": [
+      {"type": "input_value", "name": "LABEL", "check": "String"},
+      {"type": "input_value", "name": "VALUE", "check": "String"},
+      {"type": "input_value", "name": "DESC", "check": "String"}
+    ],
+    "output": null,
+    "colour": 290,
+    "tooltip": "Crea una opción para menú dinámico. label = texto visible, value = valor interno, desc = descripción opcional"
+  },
   // ─── Opciones de Comando ───
   {
     "type": "event_command_with_options",
@@ -476,6 +505,25 @@ const COMPLEX_TOOLBOX_XML = `
     </block>
     <block type="select_get_value"></block>
     <block type="select_get_label"></block>
+    <block type="send_select_menu_dynamic">
+      <value name="TEXT">
+        <block type="text">
+          <field name="TEXT">Elige una opción:</field>
+        </block>
+      </value>
+    </block>
+    <block type="build_option">
+      <value name="LABEL">
+        <block type="text">
+          <field name="TEXT">Opción 1</field>
+        </block>
+      </value>
+      <value name="VALUE">
+        <block type="text">
+          <field name="TEXT">opcion_1</field>
+        </block>
+      </value>
+    </block>
   </category>
   <category name="Opciones de Comando" colour="120">
     <block type="event_command_with_options">

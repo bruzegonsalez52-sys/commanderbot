@@ -706,6 +706,22 @@ gen['select_get_label'] = function(block) {
   return ['(interaction.component?.options?.find(o => o.value === interaction.values?.[0])?.label || "")', gen.ORDER_MEMBER];
 };
 
+// ─── Menús Dinámicos ───
+gen['send_select_menu_dynamic'] = function(block) {
+  const text = gen.valueToCode(block, 'TEXT', gen.ORDER_ATOMIC) || "''";
+  const options = gen.valueToCode(block, 'OPTIONS', gen.ORDER_ATOMIC) || '[]';
+  const ch = block.getFieldValue('CHANNEL') || 'current';
+  let channel = ch === 'current' ? 'message.channel' : "client.channels.cache.find(c => c.name === '" + ch + "')";
+  return channel + '.send({ content: ' + text + ', components: [new ActionRowBuilder().addComponents(new StringSelectMenuBuilder().setCustomId("menu_' + Date.now() + '").addOptions(' + options + '))] });\n';
+};
+
+gen['build_option'] = function(block) {
+  const label = gen.valueToCode(block, 'LABEL', gen.ORDER_ATOMIC) || "'Opción'";
+  const value = gen.valueToCode(block, 'VALUE', gen.ORDER_ATOMIC) || "'opcion'";
+  const desc = gen.valueToCode(block, 'DESC', gen.ORDER_ATOMIC) || "''";
+  return ['{ label: ' + label + ', value: ' + value + ', description: ' + desc + ' }', gen.ORDER_ATOMIC];
+};
+
 // ─── Opciones de Comando ───
 gen['event_command_with_options'] = function(block) {
   const cmd = block.getFieldValue('COMMAND') || 'comando';

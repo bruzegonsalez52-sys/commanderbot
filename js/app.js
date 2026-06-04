@@ -1390,6 +1390,13 @@ await interaction.showModal(modal);`;
       arr.push(val);
       return arr;
     }
+    if (block.type === 'build_option') {
+      return {
+        label: this.evalBlock(block.getInputTargetBlock('LABEL'), context) || 'Opción',
+        value: this.evalBlock(block.getInputTargetBlock('VALUE'), context) || 'opcion',
+        description: this.evalBlock(block.getInputTargetBlock('DESC'), context) || ''
+      };
+    }
     return '';
   }
 
@@ -1459,6 +1466,14 @@ await interaction.showModal(modal);`;
           type: 'send_select_menu',
           text: this.evalInputValue(block, 'TEXT', context),
           options: this.parseSelectOptions(block, context),
+          menuId: 'menu_' + Date.now(),
+          channel: block.getFieldValue('CHANNEL') || 'current'
+        };
+      case 'send_select_menu_dynamic':
+        return {
+          type: 'send_select_menu',
+          text: this.evalInputValue(block, 'TEXT', context),
+          options: this.evalArrayBlock(block.getInputTargetBlock('OPTIONS'), context) || [],
           menuId: 'menu_' + Date.now(),
           channel: block.getFieldValue('CHANNEL') || 'current'
         };
