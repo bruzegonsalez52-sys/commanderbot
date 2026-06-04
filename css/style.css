@@ -203,6 +203,13 @@ html, body {
   font-family: var(--font); font-size: 13px; text-decoration: underline;
   text-underline-offset: 2px;
 }
+.auth-forgot { text-align: center; margin-top: 4px; }
+.auth-forgot button {
+  background: none; border: none; color: var(--text-muted); cursor: pointer;
+  font-family: var(--font); font-size: 12px; text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.auth-forgot button:hover { color: var(--accent); }
 
 /* ─── Sidebar ─── */
 .sidebar {

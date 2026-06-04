@@ -13,6 +13,7 @@
   <script src="https://cdn.jsdelivr.net/npm/blockly@10.4.3/blocks_compressed.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/blockly@10.4.3/javascript_compressed.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/blockly@10.4.3/msg/es.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="https://www.paypal.com/sdk/js?client-id=AVQsuXqBMZYvJAt9AeqehAmfUOa1DmtWVfUCkXp-X4KRgd_uRnTI-bSx6TtGKRAdRkwyoNDXJ7lynCRr&vault=true&intent=subscription" data-sdk-integration-source="button-factory"></script>
 </head>
 <body>
@@ -30,18 +31,18 @@
         <form class="auth-form active" id="loginForm" autocomplete="off">
           <h2>Bienvenido de nuevo</h2>
           <p>Ingresa a tu cuenta para gestionar tus bots.</p>
-          <input class="auth-input" type="text" id="loginUsername" placeholder="Nombre de usuario" required>
+          <input class="auth-input" type="email" id="loginEmail" placeholder="Correo electrónico" required>
           <input class="auth-input" type="password" id="loginPassword" placeholder="Contraseña" required>
           <div class="auth-error" id="loginError"></div>
           <button class="auth-btn" type="submit">Iniciar Sesión</button>
-          <div class="auth-divider"></div>
-          <div class="auth-demo">
-            <button type="button" id="demoLoginBtn">Usar cuenta de demostración</button>
+          <div class="auth-forgot">
+            <button type="button" id="forgotPasswordBtn">¿Olvidaste tu contraseña?</button>
           </div>
         </form>
         <form class="auth-form" id="registerForm" autocomplete="off">
           <h2>Crear tu cuenta</h2>
           <p>Regístrate gratis y empieza a crear bots.</p>
+          <input class="auth-input" type="email" id="registerEmail" placeholder="Correo electrónico" required>
           <input class="auth-input" type="text" id="registerUsername" placeholder="Nombre de usuario" required>
           <input class="auth-input" type="password" id="registerPassword" placeholder="Contraseña (mín. 6 caracteres)" required>
           <input class="auth-input" type="password" id="registerConfirm" placeholder="Confirmar contraseña" required>
@@ -553,8 +554,15 @@
         createSubscription: function(data, actions) {
           return actions.subscription.create({ plan_id: 'P-8X423419NF309982GNIQM7HQ' });
         },
-        onApprove: function(data, actions) {
+        onApprove: async function(data, actions) {
           alert('¡Suscripción Pro activada! ID: ' + data.subscriptionID);
+          if (typeof sbClient !== 'undefined' && sbClient.auth) {
+            const { data: { user } } = await sbClient.auth.getUser();
+            if (user) {
+              await sbClient.auth.updateUser({ data: { plan: 'pro' } });
+              if (window.app) { window.app.currentUser.plan = 'pro'; window.app.updateAuthUI(); }
+            }
+          }
         }
       }).render('#paypal-button-container-P-8X423419NF309982GNIQM7HQ');
       paypal.Buttons({
@@ -562,8 +570,15 @@
         createSubscription: function(data, actions) {
           return actions.subscription.create({ plan_id: 'P-5PV86747834299915NIQM7RQ' });
         },
-        onApprove: function(data, actions) {
+        onApprove: async function(data, actions) {
           alert('¡Suscripción Premium activada! ID: ' + data.subscriptionID);
+          if (typeof sbClient !== 'undefined' && sbClient.auth) {
+            const { data: { user } } = await sbClient.auth.getUser();
+            if (user) {
+              await sbClient.auth.updateUser({ data: { plan: 'premium' } });
+              if (window.app) { window.app.currentUser.plan = 'premium'; window.app.updateAuthUI(); }
+            }
+          }
         }
       }).render('#paypal-button-container-P-5PV86747834299915NIQM7RQ');
     }

@@ -1,10 +1,26 @@
+// ─── Supabase ───
+const SB_URL = 'https://onnwozcmmudsdcypletl.supabase.co';
+const SB_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ubndvemNtbXVkc2RjeXBsZXRsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1MjQ0NTUsImV4cCI6MjA5NjEwMDQ1NX0.eCczc66uROZgpXYDU5BBOvhGQrK6IvLIRm_88xqs1no';
+const sbClient = supabase.createClient(SB_URL, SB_ANON_KEY);
+
 // ─── Helper global: claves localStorage por usuario ───
 window.getUserStorageKey = function(base) {
   try {
+    const key = 'sb-onnwozcmmudsdcypletl-auth-token';
+    const raw = localStorage.getItem(key);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      const uid = parsed?.user?.id || parsed?.access_token;
+      if (uid) return 'commanderbot_' + base + '_' + uid;
+    }
+  } catch {}
+  try {
     const session = JSON.parse(localStorage.getItem('commanderbot_session') || 'null');
-    const username = (session && session.username) ? session.username : 'guest';
-    return 'commanderbot_' + base + '_' + username;
-  } catch { return 'commanderbot_' + base + '_guest'; }
+    if (session && session.username) {
+      return 'commanderbot_' + base + '_' + session.username;
+    }
+  } catch {}
+  return 'commanderbot_' + base + '_guest';
 };
 
 // ─── App Principal ───
@@ -31,6 +47,7 @@ class DiscordBotBuilder {
     this.renderProjects();
     this.updateHomeStats();
     this.updateExportDisplay();
+    this.updateAuthUI();
     // Show auth after a brief delay if not logged in
     setTimeout(() => {
       if (!this.currentUser) this.showAuth();
@@ -59,13 +76,15 @@ class DiscordBotBuilder {
       authOverlay: document.getElementById('authOverlay'),
       loginForm: document.getElementById('loginForm'),
       registerForm: document.getElementById('registerForm'),
-      loginUsername: document.getElementById('loginUsername'),
+      loginEmail: document.getElementById('loginEmail'),
       loginPassword: document.getElementById('loginPassword'),
+      registerEmail: document.getElementById('registerEmail'),
       registerUsername: document.getElementById('registerUsername'),
       registerPassword: document.getElementById('registerPassword'),
       registerConfirm: document.getElementById('registerConfirm'),
       loginError: document.getElementById('loginError'),
       registerError: document.getElementById('registerError'),
+      forgotPasswordBtn: document.getElementById('forgotPasswordBtn'),
       sidebarUser: document.getElementById('sidebarUser'),
       userName: document.getElementById('userName'),
       userPlan: document.getElementById('userPlan'),
@@ -893,8 +912,7 @@ await interaction.showModal(modal);`;
   }
 
   // ─── Autenticación ───
-  bindAuth() {
-    this.currentUser = this.loadSession();
+  async bindAuth() {
 
     // Tabs login/register
     document.querySelectorAll('.auth-tab').forEach(tab => {
@@ -907,34 +925,37 @@ await interaction.showModal(modal);`;
     });
 
     // Login
-    this.dom.loginForm.addEventListener('submit', (e) => {
+    this.dom.loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const username = this.dom.loginUsername.value.trim();
+      const email = this.dom.loginEmail.value.trim();
       const password = this.dom.loginPassword.value;
-      if (!username || !password) {
+      if (!email || !password) {
         this.dom.loginError.textContent = 'Completa todos los campos.';
         this.dom.loginError.style.display = 'block';
         return;
       }
-      const users = this.getUsers();
-      const user = users[username];
-      if (!user || user.password !== password) {
-        this.dom.loginError.textContent = 'Usuario o contraseña incorrectos.';
+      this.dom.loginError.style.display = 'none';
+      const { data, error } = await sbClient.auth.signInWithPassword({ email, password });
+      if (error) {
+        this.dom.loginError.textContent = error.message === 'Invalid login credentials'
+          ? 'Correo o contraseña incorrectos.'
+          : error.message;
         this.dom.loginError.style.display = 'block';
         return;
       }
-      this.dom.loginError.style.display = 'none';
-      this.setSession(username);
+      this.currentUser = this._sbUserToLocal(data.user);
+      this.updateAuthUI();
       this.hideAuth();
     });
 
     // Register
-    this.dom.registerForm.addEventListener('submit', (e) => {
+    this.dom.registerForm.addEventListener('submit', async (e) => {
       e.preventDefault();
+      const email = this.dom.registerEmail.value.trim();
       const username = this.dom.registerUsername.value.trim();
       const password = this.dom.registerPassword.value;
       const confirm = this.dom.registerConfirm.value;
-      if (!username || !password || !confirm) {
+      if (!email || !username || !password || !confirm) {
         this.dom.registerError.textContent = 'Completa todos los campos.';
         this.dom.registerError.style.display = 'block';
         return;
@@ -949,34 +970,57 @@ await interaction.showModal(modal);`;
         this.dom.registerError.style.display = 'block';
         return;
       }
-      const users = this.getUsers();
-      if (users[username]) {
-        this.dom.registerError.textContent = 'El usuario ya existe.';
+      this.dom.registerError.style.display = 'none';
+      const { data, error } = await sbClient.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { username, plan: 'free' }
+        }
+      });
+      if (error) {
+        this.dom.registerError.textContent = error.message;
         this.dom.registerError.style.display = 'block';
         return;
       }
-      this.dom.registerError.style.display = 'none';
-      users[username] = { username, password, plan: 'free', createdAt: new Date().toISOString() };
-      this.saveUsers(users);
-      this.setSession(username);
+      // Manually sign in after signup (user is auto-confirmed)
+      const { data: signInData, error: signInError } = await sbClient.auth.signInWithPassword({ email, password });
+      if (signInError) {
+        this.dom.registerError.textContent = 'Cuenta creada. Inicia sesión manualmente.';
+        this.dom.registerError.style.display = 'block';
+        return;
+      }
+      this.currentUser = this._sbUserToLocal(signInData.user);
+      this.updateAuthUI();
       this.hideAuth();
     });
 
-    // Demo
-    document.getElementById('demoLoginBtn')?.addEventListener('click', () => {
-      const users = this.getUsers();
-      if (!users['demo']) {
-        users['demo'] = { username: 'demo', password: 'demo123', plan: 'free', createdAt: new Date().toISOString() };
-        this.saveUsers(users);
+    // Forgot password
+    this.dom.forgotPasswordBtn?.addEventListener('click', () => {
+      const email = this.dom.loginEmail.value.trim();
+      if (!email) {
+        this.dom.loginError.textContent = 'Ingresa tu correo primero.';
+        this.dom.loginError.style.display = 'block';
+        return;
       }
-      this.dom.loginUsername.value = 'demo';
-      this.dom.loginPassword.value = 'demo123';
-      this.dom.loginForm.dispatchEvent(new Event('submit'));
+      sbClient.auth.resetPasswordForEmail(email).then(({ error }) => {
+        if (error) {
+          this.dom.loginError.textContent = error.message;
+          this.dom.loginError.style.display = 'block';
+        } else {
+          this.dom.loginError.textContent = '✅ Revisa tu correo para restablecer la contraseña.';
+          this.dom.loginError.style.display = 'block';
+        }
+      });
     });
 
-    // Settings login button
+    // Settings login button (toggle logout/login)
     this.dom.settingsLoginBtn?.addEventListener('click', () => {
-      this.showAuth();
+      if (this.currentUser) {
+        if (confirm('¿Cerrar sesión?')) this.clearSession();
+      } else {
+        this.showAuth();
+      }
     });
 
     // Close auth on overlay click
@@ -995,34 +1039,49 @@ await interaction.showModal(modal);`;
         v.style.animation = e.target.checked ? '' : 'none';
       });
     });
+
+    // Listen for auth state changes
+    sbClient.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT') {
+        this.currentUser = null;
+        this.updateAuthUI();
+      }
+    });
   }
 
-  getUsers() {
-    try { return JSON.parse(localStorage.getItem('commanderbot_users') || '{}'); } catch { return {}; }
-  }
-
-  saveUsers(users) {
-    localStorage.setItem('commanderbot_users', JSON.stringify(users));
+  _sbUserToLocal(sbUser) {
+    if (!sbUser) return null;
+    const meta = sbUser.user_metadata || {};
+    return {
+      id: sbUser.id,
+      email: sbUser.email,
+      username: meta.username || sbUser.email?.split('@')[0] || 'Usuario',
+      plan: meta.plan || 'free',
+      createdAt: sbUser.created_at
+    };
   }
 
   loadSession() {
     try {
+      const key = 'sb-onnwozcmmudsdcypletl-auth-token';
+      const raw = localStorage.getItem(key);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed?.user) return this._sbUserToLocal(parsed.user);
+      }
+    } catch {}
+    try {
       const data = JSON.parse(localStorage.getItem('commanderbot_session') || 'null');
       if (data && data.username) {
-        const users = this.getUsers();
+        const users = JSON.parse(localStorage.getItem('commanderbot_users') || '{}');
         if (users[data.username]) return users[data.username];
       }
     } catch {}
     return null;
   }
 
-  setSession(username) {
-    localStorage.setItem('commanderbot_session', JSON.stringify({ username }));
-    this.currentUser = this.getUsers()[username];
-    this.updateAuthUI();
-  }
-
-  clearSession() {
+  async clearSession() {
+    await sbClient.auth.signOut();
     localStorage.removeItem('commanderbot_session');
     this.currentUser = null;
     this.updateAuthUI();
@@ -1030,8 +1089,9 @@ await interaction.showModal(modal);`;
 
   showAuth() {
     this.dom.authOverlay?.classList.add('active');
-    this.dom.loginUsername.value = '';
+    this.dom.loginEmail.value = '';
     this.dom.loginPassword.value = '';
+    this.dom.registerEmail.value = '';
     this.dom.registerUsername.value = '';
     this.dom.registerPassword.value = '';
     this.dom.registerConfirm.value = '';
@@ -1055,13 +1115,13 @@ await interaction.showModal(modal);`;
       const initials = this.currentUser.username.substring(0, 2).toUpperCase();
       this.dom.userAvatar.textContent = initials;
       this.dom.settingsUsername.textContent = this.currentUser.username;
-      this.dom.settingsPlan.textContent = plan === 'free' ? 'Gratuito — 5 proyectos, 100 bloques/proyecto' : 'Pro — Ilimitado';
+      const planDesc = plan === 'free' ? 'Gratuito — 5 proyectos, 100 bloques/proyecto'
+        : plan === 'pro' ? 'Pro — Proyectos ilimitados, todos los bloques'
+        : 'Premium — Todo incluido';
+      this.dom.settingsPlan.textContent = planDesc;
       this.dom.settingsBadge.textContent = planLabels[plan] || 'Gratuito';
       this.dom.settingsBadge.className = 'settings-badge ' + plan;
       this.dom.settingsLoginBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Cerrar sesión';
-      this.dom.settingsLoginBtn.onclick = () => {
-        if (confirm('¿Cerrar sesión?')) this.clearSession();
-      };
     } else {
       this.dom.sidebarUser.style.display = 'none';
       this.dom.settingsUsername.textContent = 'No has iniciado sesión';
@@ -1069,7 +1129,6 @@ await interaction.showModal(modal);`;
       this.dom.settingsBadge.textContent = 'Gratuito';
       this.dom.settingsBadge.className = 'settings-badge free';
       this.dom.settingsLoginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Iniciar sesión';
-      this.dom.settingsLoginBtn.onclick = () => this.showAuth();
     }
   }
 
